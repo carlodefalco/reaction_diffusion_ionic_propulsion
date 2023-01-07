@@ -10,7 +10,9 @@ main () {
 
   reaction_list rl{};
   rl.read ("reaction_list.json");
+  rl.pretty_print (std::cout);
   rl.print (std::cout);
+  
   return 0;
     
 }
