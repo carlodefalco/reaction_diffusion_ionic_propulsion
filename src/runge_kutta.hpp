@@ -15,9 +15,16 @@ struct
 dorpri5 {
 
   /*
-    Reference: Hairer, Ernst; Nørsett, Syvert Paul; Wanner, Gerhard (2008),
+    References: 
+
+    [1] Hairer, Ernst; Nørsett, Syvert Paul; Wanner, Gerhard (2008),
     Solving ordinary differential equations I: Nonstiff problems,
     Berlin, New York: Springer-Verlag, ISBN 978-3-540-56670-0
+
+    [2] Hairer, Ernst; Wanner, Gerhard,
+    Solving ordinary differential equations II: Stiff and Differential-Algebraic problems,
+    Berlin, New York: Springer-Verlag, ISBN 978-3-642-05220-0
+
   */
 
   static constexpr int s = 6;
@@ -39,6 +46,7 @@ dorpri5 {
   std::vector<double> y_lo;
   std::vector<double> y_hi;
   double err;
+  double err_old;
   
   void
   step (double x0,
@@ -102,6 +110,7 @@ integrate_adaptive (ratefun fun,
 		    std::vector<double> &x, std::vector<double> &y) {
 
   dorpri5 rk{};
+  rk.err_old = tol;
   
   x.clear ();
   y.clear ();
@@ -112,8 +121,9 @@ integrate_adaptive (ratefun fun,
   auto y_back = y.begin ();
   
   double tnew = xstart;
-  double dt = (xend - xstart) / 10.;
-
+  const double dtmin = 1.0e-14;
+  double dt = 5*dtmin;
+  
   int rejected = 0;
   while (x.back () < xend) {
     tnew = x.back () + dt;
@@ -127,18 +137,27 @@ integrate_adaptive (ratefun fun,
 
     auto tmpfun  = [] (double x, double y) { return std::abs (x) < std::abs (y); };
     auto normylo = std::abs (*std::max_element (rk.y_lo.begin (), rk.y_lo.end (), tmpfun));
-    
-    if (rk.err < tol * (1. + std::abs (normylo))) {
+
+    std::cerr << "t = " << tnew << " dt = " << dt << " dtmin " << dtmin << std::endl;
+    if (rk.err < tol * (1. + std::abs (normylo)) || dt <= dtmin) {
       x.push_back (tnew);
       y.insert (y.end (), rk.y_lo.begin (), rk.y_lo.end ());
       y_back = y.end () - ncomp;
+      rk.err_old = rk.err;
       //y.push_back (rk.y_lo);
     } else {
       ++rejected;
     }
-    dt = .8 * dt * std::pow (tol / rk.err, 1./5.);
-    if (dt < std::numeric_limits<double>::epsilon () * 100)
-      dt = std::numeric_limits<double>::epsilon () * 100;
+
+    //
+    // Apply step selection stabilization
+    // from [2, formula (2.43c)]
+    //
+    
+    dt = .8 * dt * std::pow (tol / rk.err, 1./5.) * std::pow (rk.err_old / tol, .08);
+    
+    if (dt < dtmin)
+      dt = dtmin;
   }
   std::cerr << rejected << " rejected steps" << std::endl;
 };
