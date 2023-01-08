@@ -6,6 +6,11 @@
 #include <functional>
 #include <limits>
 
+using ratefun = std::function<void (double x0,
+				    std::vector<double>::const_iterator starty0,
+				    std::vector<double>::const_iterator endy0,
+				    std::vector<double>::iterator startdydx)>;
+
 struct
 dorpri5 {
 
@@ -34,11 +39,6 @@ dorpri5 {
   std::vector<double> y_lo;
   std::vector<double> y_hi;
   double err;
-
-  using ratefun = std::function<void (double x0,
-				      std::vector<double>::const_iterator starty0,
-				      std::vector<double>::const_iterator endy0,
-				      std::vector<double>::iterator startdydx)>;
   
   void
   step (double x0,
@@ -96,7 +96,7 @@ dorpri5 {
 };
 
 void
-integrate_adaptive (dorpri5::ratefun fun,
+integrate_adaptive (ratefun fun,
 		    const std::vector<double> &y0,
 		    double xstart, double xend, double tol,
 		    std::vector<double> &x, std::vector<double> &y) {
@@ -124,12 +124,10 @@ integrate_adaptive (dorpri5::ratefun fun,
 
     rk.step (x.back (), y_back, y.end (), dt, fun);
     
+
+    auto tmpfun  = [] (double x, double y) { return std::abs (x) < std::abs (y); };
+    auto normylo = std::abs (*std::max_element (rk.y_lo.begin (), rk.y_lo.end (), tmpfun));
     
-    auto normylo =
-      std::abs (
-		*std::max_element (rk.y_lo.begin (), rk.y_lo.end (),
-				   [] (double x, double y) { return std::abs (x) < std::abs (y); } )
-		);
     if (rk.err < tol * (1. + std::abs (normylo))) {
       x.push_back (tnew);
       y.insert (y.end (), rk.y_lo.begin (), rk.y_lo.end ());

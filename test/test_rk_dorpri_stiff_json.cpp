@@ -1,6 +1,7 @@
 #include <iomanip>
 #include <iostream>
 #include <vector>
+#include <reaction_kinetics.hpp>
 #include <runge_kutta.hpp>
 
 
@@ -9,7 +10,13 @@
 //  2 B   -> C + B
 //  B + C -> A + C
 // with fwd coefficients .04, 3.e7 and 1.e4.
+//
+// reactions and coefficients are read from the
+// file robertson_autocatalysis.json.
+//
 // Initial conditions A = 1, B = 0, C = 0.
+
+reaction_list rl{};
 
 void
 fun (double x0,
@@ -18,25 +25,7 @@ fun (double x0,
      std::vector<double>::iterator startdydx)
 {
   
-  static double R1 = 0.;
-  static double R2 = 0.;
-  static double R3 = 0.;
-  
-  const double& A = *(starty0);
-  const double& B = *(starty0+1);
-  const double& C = *(starty0+2);
-
-  double &Adot = *(startdydx);
-  double &Bdot = *(startdydx+1);
-  double &Cdot = *(startdydx+2);
-
-  R1 = .04 * A;
-  R2 = 3.e7 * B * B;
-  R3 = 1.e4 * B*C;
-
-  Adot = - R1 + R3;
-  Bdot =   R1 - 2*R2 + R2 - R3;
-  Cdot =   R2 - R3 + R3;
+  rl.change_rate (starty0, endy0, startdydx);
   
 };
 
@@ -45,7 +34,8 @@ int
 main () {
 
   dorpri5 rk{};
-
+  rl.read ("robertson_autocatalysis.json");
+  rl.pretty_print (std::cerr);
   
   double x0   = 0.;
   double xend = 1000.;

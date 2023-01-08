@@ -1,0 +1,42 @@
+[
+    {
+	"reactants" : { "e" : 1, "Ar" : 1},
+	"products" : { "e" : 2, "Ar+" : 1},
+	"rate_coeffs" : [1.0e+4, 0.0]
+    },
+    {
+	"reactants" : { "e" : 1, "Ar" : 1},
+	"products" : { "e" : 1, "Ar*" : 1},
+	"rate_coeffs" : [1.0e+4, 0.0]
+    },
+    {
+	"reactants" : { "e" : 1, "Ar*" : 1},
+	"products" : { "e" : 2, "Ar+" : 1},
+	"rate_coeffs" : [1.0e+4, 0.0]
+    },
+    {
+	"reactants" : { "Ar*" : 2},
+	"products" : { "e" : 1, "Ar+" : 1, "Ar" : 1},
+	"rate_coeffs" : [1.0e+4, 0.0]
+    },
+    {
+	"reactants" : { "Ar+" : 1, "Ar" : 2},
+	"products" : { "Ar2+" : 1, "Ar" : 1},
+	"rate_coeffs" : [1.0e+4, 0.0]
+    },
+    {
+	"reactants" : { "e" : 1, "Ar2+" : 1},
+	"products" : { "Ar*" : 1, "Ar" : 1},
+	"rate_coeffs" : [1.0e+4, 0.0]
+    },
+    {
+	"reactants" : { "Ar*" : 1},
+	"products" : { "Ar" : 1, "h_nu" : 1},
+	"rate_coeffs" : [5.0e+5, 0.0]
+    },
+    {
+	"reactants" : { "e" : 1, "Ar" : 1},
+	"products" : { "e" : 1, "Ar" : 1},
+	"rate_coeffs" : [1.0e+3, 0.0]
+    }
+]
