@@ -137,8 +137,56 @@ reaction_list {
 
   void
   change_rate (std::vector<double>::const_iterator state_begin,
-	      std::vector<double>::const_iterator state_end,
-	      std::vector<double>::iterator dot_state_begin) {
+	       std::vector<double>::const_iterator state_end,
+	       std::vector<double>::iterator dot_state_begin) {
+
+    // assuming the range
+    // dot_state_begin ... dot_state_begin + (state_end-state_begin)
+    // to be allocated and assigned with zeros
+    
+    auto dot_state_it = dot_state_begin;
+    double Rfi = 0., Rbi = 0., Ri = 0.;
+     
+    for (auto reaction_it = data.begin ();
+	 reaction_it != data.end ();
+	 ++reaction_it, ++dot_state_it) {
+
+      Rfi = reaction_it->rate_coeffs[0];
+      for (auto const & ir : reaction_it->reactants) {
+	int sidx = species.at (ir.first);
+	Rfi *= std::pow (*(state_begin+sidx), ir.second);
+      }
+
+      Rbi = reaction_it->rate_coeffs[1];
+      for (auto const & ir : reaction_it->products) {
+	int sidx = species.at (ir.first);
+	Rbi *= std::pow (*(state_begin+sidx), ir.second);
+      }
+
+      Ri = Rfi - Rbi;
+
+      for (auto const & ir : reaction_it->reactants) {
+	int sidx = species.at (ir.first);
+	*(dot_state_begin+sidx) += - Ri * ir.second;
+      }
+
+       for (auto const & ir : reaction_it->products) {
+	int sidx = species.at (ir.first);
+	*(dot_state_begin+sidx) += Ri * ir.second;
+      }
+       
+    }
+	
+
+  }
+
+
+  void
+  change_rate_wjac (std::vector<double>::const_iterator state_begin,
+		    std::vector<double>::const_iterator state_end,
+		    std::vector<double>::iterator dot_state_begin,
+		    std::vector<double> &jacobian,
+		    bool computejacobian) {
 
     // assuming the range
     // dot_state_begin ... dot_state_begin + (state_end-state_begin)

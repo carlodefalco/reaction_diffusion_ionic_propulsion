@@ -145,14 +145,18 @@ integrate_adaptive_trapz (ratefunwjac fun,
     std::cerr << "t = " << tnew << " dt = " << dt << " dtmin " << dtmin << std::endl;
     if (rk.err < tol * (1. + std::abs (normylo)) || dt <= dtmin) {
       x.push_back (tnew);
-      y.insert (y.end (), rk.y_lo.begin (), rk.y_lo.end ());
+      y.insert (y.end (), rk.y_hi.begin (), rk.y_hi.end ());
       y_back = y.end () - ncomp;
-     
+      dt = .5 * dt * std::pow (tol / rk.err, 1./2.);
+      
     } else {
+      
       ++rejected;
+      dt = .1*dt;
+      
     }
     
-    dt = .5 * dt * std::pow (tol / rk.err, 1./2.);
+    
     
     if (dt < dtmin)
       dt = dtmin;
