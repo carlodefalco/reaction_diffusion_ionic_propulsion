@@ -1,6 +1,8 @@
 addpath (canonicalize_file_name ("../../data"));
 [r, idx] = read_reactions (file_in_loadpath ("balcon_et_al_argon_ionization.json"));
 
+pretty_print_reactions (r);
+
 x0 = zeros (numfields (idx), 1);
 x0(idx.("Ar"))   = 2.5e+19;
 x0(idx.("e"))    = 1.0e+6;
