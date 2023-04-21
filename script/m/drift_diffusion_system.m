@@ -23,9 +23,9 @@
 pkg load fpl bim msh
 
 L = 2e-3;
-N = 31;
+N = 61;
 x = linspace (0, L, N).';
-T = 1e-3;
+T = 1.2e-4;
 
 function dy = odefun (t, y, x, N, V0, q, epsilon, Vth, mun, mup)
 
@@ -40,7 +40,7 @@ function dy = odefun (t, y, x, N, V0, q, epsilon, Vth, mun, mup)
   phi = zeros (N, 1);
   phi([1 N]) = V0t;
 
-  phi(2:end-1) = A00(2:end-1, 2:end-1) \ (-A00(2:end-1, :) * phi);
+  phi(2:end-1) = A00(2:end-1, 2:end-1) \ (b(2:end-1)-A00(2:end-1, :) * phi);
   
   An = - bim1a_advection_diffusion (x, mun*Vth, 1, 1, phi/Vth);
   dn = zeros (N, 1);
@@ -69,8 +69,8 @@ function J = jacobian (t, y, x, N, V0, q, epsilon, Vth, mun, mup)
   phi = zeros (N, 1);
   phi([1 N]) = V0t;
 
-  phi(2:end-1) = A00(2:end-1, 2:end-1) \ (-A00(2:end-1, :) * phi);
-  
+  phi(2:end-1) = A00(2:end-1, 2:end-1) \ (b(2:end-1)-A00(2:end-1, :) * phi);
+
   
   J = sparse (2*N, 2*N);
 
@@ -88,27 +88,34 @@ function J = jacobian (t, y, x, N, V0, q, epsilon, Vth, mun, mup)
   
 endfunction
 
-V0 = @(t) 1000*[0; ((t-1e-4)*1e4 .* ((t>=1e-4)&(t<=2e-4)) + 1.0 .* (t>2e-4))];
+V0 = @(t) 5000*[zeros(size(t)); ((t-1e-4)*1e6 .* ((t>=1e-4)&(t<=1.01e-4)) + 1.0 .* (t>1.01e-4))];
 q  = 1.6e-19;
 epsilon = 8.8e-12;
 mun = 1e-3;
 mup = 1e-3;
 Vth = 26e-3;
 
-n0 = x .* (L - x) * 1e6 / (L/2)^2;
-p0 = x .* (L - x) * 1e6 / (L/2)^2;
+n0 = x .* (L - x) * 7e16 / (L/2)^2;
+p0 = x .* (L - x) * 7e16 / (L/2)^2;
 
 y0 = [n0; p0];
 o = odeset ('Jacobian', @(t, y) jacobian (t, y, x, N, V0, q, epsilon, Vth, mun, mup),
-	    'InitialStep', 1e-7);
+	    'InitialStep', 5e-5);
 [t, y] = ode15s (@(t, y) odefun (t, y, x, N, V0, q, epsilon, Vth, mun, mup), [0 T], y0, o);
 
 n = y(:, 1:N);
 p = y(:, N+(1:N));
+V = V0(t')(2, :);
 for ii = 1 : numel (t)
+  subplot(1, 2, 1)
   plot (x,n(ii, :), x, p(ii, :))
   title (sprintf ("%g", t(ii)));
   legend ('n', 'p');
   axis ([min(x) max(x) 0 max(max(n0))]);
+  subplot(1, 2, 2)
+  plot (t, V, t(ii), V(ii), 'ro')
+  title ('V')
+  xlabel ('t [s]')
+  ylabel ('V [V]')
   drawnow
 endfor
