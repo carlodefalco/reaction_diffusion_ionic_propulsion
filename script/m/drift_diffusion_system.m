@@ -23,9 +23,10 @@
 pkg load fpl bim msh
 
 L = 2e-3;
-N = 61;
+N = 81;
 x = linspace (0, L, N).';
-T = 1.2e-4;
+T0 = 0.999e-4;
+T1 = 1.02e-4;
 
 function dy = odefun (t, y, x, N, V0, q, epsilon, Vth, mun, mup)
 
@@ -95,13 +96,14 @@ mun = 1e-3;
 mup = 1e-3;
 Vth = 26e-3;
 
-n0 = x .* (L - x) * 7e16 / (L/2)^2;
-p0 = x .* (L - x) * 7e16 / (L/2)^2;
+n0 = x .* (L - x) * 2e17 / (L/2)^2;
+p0 = x .* (L - x) * 2e17 / (L/2)^2;
 
 y0 = [n0; p0];
 o = odeset ('Jacobian', @(t, y) jacobian (t, y, x, N, V0, q, epsilon, Vth, mun, mup),
-	    'InitialStep', 5e-5);
-[t, y] = ode15s (@(t, y) odefun (t, y, x, N, V0, q, epsilon, Vth, mun, mup), [0 T], y0, o);
+	    'InitialStep', 1e-4-T0);
+[t, y] = ode15s (@(t, y) odefun (t, y, x, N, V0, q, epsilon, Vth, mun, mup),
+		 linspace (T0, T1, 100), y0, o);
 
 n = y(:, 1:N);
 p = y(:, N+(1:N));
