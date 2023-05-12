@@ -1,0 +1,80 @@
+\documentclass[11pt]{amsart}
+\usepackage{geometry} 
+\geometry{a4paper}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+
+\title{Drift--Diffusion Equations with Chemical Reactions}
+\author{}
+
+\begin{document}
+\maketitle
+
+\section{Reaction Systems}
+
+Given the set of $M$ reactions involving $N$ species
+\[
+\sum_{k=1}^{N} r_{i,k}\ s_k\ =\ \sum_{k=1}^{N} p_{i,k}\ s_k \qquad  i=1\ldots M
+\]
+with forward reaction coefficient $c^f_i$ and backward reaction coefficient $c^b_i$,
+the rate $R^{f}_i$ of the $i$-th forward reaction is 
+$$
+ R^{f}_i = c^{f}_i \prod_k s_k^{ r_{i,k} }
+$$
+the rate $R^{b}_i$ of the $i$-th forward reaction is 
+$$
+ R^{b}_i = c^{b}_i \prod_k s_k^{ p_{i,k} }
+$$
+the net rate of the i-th reaction is 
+$$
+R_i = R^{f}_i - R^{b}_i
+$$
+the system of odes representing the reactions is
+$$
+\dot{s}_k = \sum_{i=1}^M \left( - R^{f}_i r_{i,k} + R^{f}_i p_{i,k}
+             - R^{b}_i p_{i,k} - R^{b}_i r_{i,k} \right) =
+             - \sum_{i=1}^M  R_i\ (r_{i,k} - p_{i,k}) 
+$$
+
+\section{Drift--Diffusion with Reactions}
+
+The motion of the the $M$ species is governed by the continuity equations
+$$
+\dfrac{\partial s_{k}}{\partial t} + \mathrm{div} \left( \mathbf{F}_{k} \right) = \dot{s}_k  \qquad  i=1\ldots M
+$$
+where the flux $\mathbf{F}_{k}$ is composed of a Drift and a Diffusion part
+$$
+\mathbf{F}_{k} = - D_{k} \nabla s_{k} + \mu_{k}\ \mathbf{E}\ z_{k} s_{k}
+$$
+where $\mathbf{E}$ denotes the electric field, $z_{k}$ the valence number, $D_{k}$ and $\mu_{k}$ the mobility.
+The electric field can be expressed as $\mathbf{E} = - \nabla \varphi$ and the electrostatic potential $\varphi$ 
+satisfies
+$$
+-\mathrm{div}\ \left( \varepsilon \nabla \varphi \right) = q \sum_{k=1}^{N} z_{k} s_{k}
+$$
+
+\section{Models for the Reaction Coefficients}
+
+$c^{b}_i$ and $c^{f}_i$ may depend on temperature, electric field and densities, \dots(add more details) 
+
+Arrhenius model
+
+$$
+c^{f}_i = A^{f}_{i} \exp\left( \dfrac{T}{T^{f}_{i}} \right)
+$$
+
+\section{Models for the Transport Coefficients}
+
+$D_{k}$ and $\mu_{k}$ may depend on temperature, electric field and densities, \dots(add more details)
+
+Usually they are related by the Stokes--Einstein relation 
+
+$$
+D_{k} = \dfrac{K_{b} T}{q} \mu_{k}
+$$
+
+\section{Energy/Temperature Equations}
+TODO(?)
+\end{document}  
