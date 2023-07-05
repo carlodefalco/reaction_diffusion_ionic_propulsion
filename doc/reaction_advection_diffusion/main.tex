@@ -1,0 +1,316 @@
+\documentclass[11pt]{amsart}
+\usepackage{graphicx} % Required for inserting images
+\input{comandi}
+\usepackage{geometry} 
+\usepackage{amsmath}
+\geometry{a4paper}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\usepackage{xcolor}
+\usepackage{chemformula}
+\title{Models Description}
+\author{giuseppe.calio }
+\date{May 2023}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+
+\title{Drift--Diffusion Equations with Chemical Reactions}
+
+
+\begin{document}
+\maketitle
+
+\section{Reaction Systems}
+
+Given the set of $M$ reactions involving $N$ species
+\[
+\sum_{k=1}^{N} r_{i,k}\ s_k\ =\ \sum_{k=1}^{N} p_{i,k}\ s_k \qquad  i=1\ldots M
+\]
+with forward reaction coefficient $c^f_i$ and backward reaction coefficient $c^b_i$,
+the rate $R^{f}_i$ of the $i$-th forward reaction is 
+$$
+ R^{f}_i = c^{f}_i \prod_k s_k^{ r_{i,k} }
+$$
+the rate $R^{b}_i$ of the $i$-th forward reaction is 
+$$
+ R^{b}_i = c^{b}_i \prod_k s_k^{ p_{i,k} }
+$$
+the net rate of the i-th reaction is 
+$$
+R_i = R^{f}_i - R^{b}_i
+$$
+the system of odes representing the reactions is
+$$
+\dot{s}_k = \sum_{i=1}^M \left( - R^{f}_i r_{i,k} + R^{f}_i p_{i,k}
+             - R^{b}_i p_{i,k} + R^{b}_i r_{i,k} \right) =
+             - \sum_{i=1}^M  R_i\ (r_{i,k} - p_{i,k}) 
+$$
+
+\section{Drift--Diffusion with Reactions}
+
+The motion of the the $M$ species is governed by the continuity equations
+$$
+\dfrac{\partial s_{k}}{\partial t} + \mathrm{div} \left( \mathbf{F}_{k} \right) = \dot{s}_k  \qquad  i=1\ldots M
+$$
+where the flux $\mathbf{F}_{k}$ is composed of a Drift and a Diffusion part
+$$
+\mathbf{F}_{k} = - D_{k} \nabla s_{k} + \mu_{k}\ \mathbf{E}\ z_{k} s_{k}
+$$
+where $\mathbf{E}$ denotes the electric field, $z_{k}$ the valence number, $D_{k}$ and $\mu_{k}$ 
+the diffusivity and mobility, respectively.
+The electric field can be expressed as $\mathbf{E} = - \nabla \varphi$ and the electrostatic potential $\varphi$ 
+satisfies
+$$
+-\mathrm{div}\ \left( \varepsilon \nabla \varphi \right) = q \sum_{k=1}^{N} z_{k} s_{k}
+$$
+
+\section{Models for the Reaction Coefficients}
+
+$c^{b}_i$ and $c^{f}_i$ may depend on temperature, electric field and densities, \dots(add more details.. \textcolor{red}{\textbf{??}})
+
+Arrhenius model prescribes the dependency of the reaction coefficients on the temperature
+$$
+c^{f}_i = A^{f}_{i} \exp\left( -\dfrac{\epsilon_a}{k_B T_{i}} \right)
+$$
+where $\epsilon_a$ is the Arrhenius activation energy.
+A better experimental fitting can be obatined as suggest by Vincenti:
+$$
+c^{f}_i =A^{f}_{i} T^b \exp\left( -\dfrac{\epsilon_a}{k_B T_{i}} \right)
+$$
+The backward coefficient can be obtained as:
+$$
+c^{b}_i= c^{f}_i/C_c(T)  
+$$
+where $K_c(T)$ is obtained from the law of mass action:
+$$
+C_c(T)= \frac{\prod_{k=1}^N s_k^{p_{i,k}}}{\prod_{k=1}^N s_k^{r_{i,k}}}
+$$
+
+\section{Models for the Transport Coefficients}
+
+$D_{k}$ and $\mu_{k}$ may depend on temperature, electric field and densities, \dots(add more details)
+\textcolor{red}{\textbf{??}})
+Usually they are related by the Stokes--Einstein relation 
+
+$$
+D_{k} = \dfrac{K_{b} T}{q} \mu_{k}
+$$
+
+\section{Energy/Temperature Equations}
+$$
+\parder{s_\epsilon}{t} + \diverg{\mathbf{{\Gamma_\epsilon}}} = H - P(\bar{\epsilon})
+$$
+where $s_\epsilon = \bar{\epsilon} s_e$ is the energy density, $\mathbf{\Gamma_e}$ is the electron mean energy flux, $H$ is the heating term, $P(\bar{\epsilon)}$ is the energy loss, and $\bar{\epsilon}$ is the electron mean energy.
+The heating term, the energy loss and the energy flux are calculated as follows:
+$$
+H=-s_e e \mathbf{E} \cdot  \mathbf{\bar{v}}_e
+$$ 
+$$
+P(\bar{\epsilon})=-s_e\bar{\nu}_e\bar{\epsilon}
+$$
+$$
+\mathbf{\Gamma_\epsilon}= +s_\epsilon \mu_\epsilon z_k \mathbf{E} + D_\epsilon\nabla n_\epsilon
+$$    
+$\mathbf{\bar{v}}_e$ is the mean electron velocity, $\mu_\epsilon$ is the energy transfer frequency;
+$\mu_\epsilon = 5/3\mu_e$ the energy mobility and $D_\epsilon = 5/3 D_e$ its diffusion coefficient.\\
+Following the Balcon approach, the gas temperature is approximated to be constant and equal to the ambient one, therefore the energy equation is not needed under this hyphotesis.
+
+\section{Definizione di file??}
+\section{Description of the input file}
+Given the generic reaction
+$$
+\nu_A A + \nu_B B \ch{<>} \nu_C C + \nu_D D    
+$$
+with $\nu_i$ stoichiometric coefficient for the $i-th$ species.\\
+Il file Json riporta per ogni reazioni le informazioni secondo la seguente struttura:
+\begin{itemize}
+    \item reactants:\{"A": $\nu_A$, "B": $\nu_B$\}
+    \item products:\{"C": $\nu_C$, "D": $\nu_D$\}
+    \item model: Bolsig or Arrhenius)
+    \item parameters for Arrhenius model A, b, $E_{a}$ respectively in an array of two elements for the reaction coefficient $c_{f}$(forward reaction) and  $c_{b}$ (backward reaction)
+\end{itemize}
+
+Let's make an example taking into account the Robertson system of reactions for the autocatalysis:
+The system of reactions reads:
+
+\begin{align}
+    A \ch{->} B \\
+    2B\ch{->} B + C\\
+    B +C \ch{->} A + C
+\end{align}
+with rates:
+$$
+R_1^f=0.04 s_A
+$$
+$$
+R_2^f=3*10^7 s_B^2
+$$
+$$
+R_3^f=10^4 s_Bs_C
+$$
+the production rate is:
+$$
+\dot{s_A}=-R_1^f + R_3^f
+$$
+$$
+\dot{s_B}=R_1^f - R_2^f-R_3^f
+$$
+$$
+\dot{s_C}=R_2^f 
+$$
+
+This system of equation in the input file in $.json$ format reads:\\
+\{\\
+$"reactants" : \{ "A" : 1\}$\\
+$"products" : \{ "B" : 1\},$\\
+$"model": "Arrhenius",$\\
+$"rate\_coeffs" : \{"A":0.04, "b":0,"E_a":0\}$\\
+\}\\
+\\
+\{\\
+$"reactants" : \{ "B" : 2 \},$\\
+$"products" : \{ "B" : 1, "C" : 1 \}$,\\
+$"model": "Arrhenius",$\\
+$"rate\_coeffs" : \{"A":3e+7, "b":0,"E_a":0\}$\\
+\}\\
+\\
+\{
+$"reactants":\{ "B" : 1, "C" : 1 \}$\\
+$"products" : \{ "A" : 1, "C" : 1 \},$\\
+$"model": "Arrhenius",$\\
+$"rate\_coeffs" : \{"A":1e+4, "b":0,"E_a":0\}$\\
+\}\\
+
+\section{Plasma chemistry in Argon}
+The following reactions have been considered in the model(Balcon):
+\begin{enumerate}
+    \item Ionization by direct impact: $e + Ar \ch{<>} 2e + Ar^+$;
+    \item Excitation: $e + Ar \ch{<>} e + Ar^*$;
+    \item Ionization by direct impact on an excited atoms: $e + Ar^* \ch{<>} 2e + Ar^+$; 
+    \item Ionization by collision of excited atoms: $2Ar^* \ch{<>} e + Ar^+ + Ar $;
+    \item Associative ionization $Ar^+ + 2Ar \ch{<>} Ar + Ar_2^+$;
+    \item Dissociative electron ion recombination $e + Ar_2^+ \ch{<>} Ar + Ar^*$;
+    \item spontaneous de-excitation $Ar^* \ch{<>} Ar +h\nu$;
+    \item electron-gas scattering $e + Ar \ch{<>} e + Ar$;
+\end{enumerate}
+
+The forward reaction rates are:
+$$
+R_1^f=c_1^f s_es_{Ar}
+$$
+$$
+R_2^f=c_2^f s_es_{Ar}
+$$
+$$
+R_3^f=c_3^f s_es_{Ar^*}
+$$
+$$
+R_4^f=c_4^f s_{Ar^*}^2
+$$
+$$
+R_5^f=c_5^f s_{Ar^+}s_{Ar}^2
+$$
+$$
+R_6^f=c_6^f s_{e}s_{Ar_2^+}
+$$
+$$
+R_7^f=c_7^f s_{Ar^*}
+$$
+$$
+R_8^f=c_8^f s_es_{Ar}
+$$
+The backward reaction rates are:
+$$
+R_1^b=c_1^b s_e^2s_{Ar^+}
+$$
+$$
+R_2^b=c_2^b s_es_{Ar^*}
+$$
+$$
+R_3^b=c_3^b s_e^2s_{Ar^+}
+$$
+$$
+R_4^b=c_4^b  s_es_{Ar}s_{Ar^+}
+$$
+$$
+R_5^b=c_5^b s_{Ar}s_{Ar_2^+}
+$$
+$$
+R_6^b=c_6^b s_{Ar}s_{Ar^*}
+$$
+$$
+R_7^b=c_7^b s_{Ar}
+$$
+$$
+R_8^b=c_8^b s_es_{Ar}
+$$
+with reaction coefficients specified according to the Arrhenius model of computed though BOLSIG+.
+
+The system of ODEs is:
+\begin{align*}
+    \dot{s_e}= R_1 +R_3+ +R_4 -R_6\\
+    \dot{s_{Ar}}= -R_1-R_2 +R_4- R_5+R_6+R_7\\
+    \dot{s_{Ar^+}}=+R_1+R_3+R_4-R_5\\
+    \dot{s_{Ar^*}}=+R_2-R_3-2R_4+R_6-R_7\\
+    \dot{s_{Ar_2^+}}=+R_5-R_6
+\end{align*}
+in $.json$ format:\\
+\{
+$"reactants" : \{ "e" : 1, "Ar" : 1\},$\\
+$"products" : \{ "e" : 2, "Ar+" : 1\},$\\
+$"model" : \{"Bolsig": ["Ar", "Ar+"]\},$\\
+$"rate_coeffs" : \{\}$\\
+\}\\
+\\
+\{\\
+	$"reactants" : \{ "e" : 1, "Ar" : 1\},$\\
+	$"products" : \{ "e" : 1, "Ar*" : 1\},$\\
+	$"model" : \{"Bolsig": ["Ar", "Ar*"]\},$\\
+	$"rate_coeffs" : \{\}$\\
+\}\\
+\\
+\{\\
+	$"reactants" : \{ "e" : 1, "Ar*" : 1\},$\\
+	$"products" : \{ "e" : 2, "Ar+" : 1\},$\\
+	$"model" : \{"Bolsig": ["Ar*", "Ar+"]\},$\\
+	$"rate_coeffs" : \{\}$\\
+\}\\
+\\
+\{\\
+	$"reactants" : \{ "Ar*" : 2\},$\\
+	$"products" : \{ "e" : 1, "Ar+" : 1, "Ar" : 1\},$\\
+	$"model" : "Arrhenius",$\\
+$	"rate_coeffs" : \{"A" : 1.2e-9*300^0.5,"b": -0.5,"E_a": 0\}$\\
+\}\\
+\\
+\{\\
+	$"reactants" : \{ "Ar+" : 1, "Ar" : 2\},$\\
+	$"products" : \{ "Ar2+" : 1, "Ar" : 1\},$\\
+	$"model" : "Arrhenius",$\\
+	$"rate_coeffs" : \{"A" : 2.5e-31*300^0.5,"b":-1.5,"E_a": 0\}$\\
+\}\\
+\\
+\{\\
+	$"reactants" : \{ "e" : 1, "Ar2+" : 1\},$\\
+	$"products" : \{ "Ar*" : 1, "Ar" : 1\},$\\
+	$"model" : "Arrhenius",	$\\
+	$"rate_coeffs" : \{"A" : 7e-7*300^0.5,"b":-0.5,"E_a": 0\}$\\
+\}\\
+\\
+\{\\
+	$"reactants" : \{ "Ar*" : 1\},$\\
+	$"products" : \{ "Ar" : 1, "h_nu" : 1\},$\\
+	$"model" : "Arrhenius",$\\
+	$"rate_coeffs" : \{"A" : 5e5,"b":0,"E_a": 0\}$\\
+\}\\
+\\
+\{\\
+	$"reactants" : \{ "e" : 1, "Ar" : 1\},$\\
+	$"products" : \{ "e" : 1, "Ar" : 1\},$\\
+	$"model" : \{"Bolsig": ["Ar", "Ar"]\},$\\
+	$"rate_coeffs" : \{\}$\\
+\}
+
+
+
+
+\end{document}  
