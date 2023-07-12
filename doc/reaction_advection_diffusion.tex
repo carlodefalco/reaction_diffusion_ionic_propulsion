@@ -1,17 +1,34 @@
 \documentclass[11pt]{amsart}
+\usepackage{graphicx} % Required for inserting images
+\input{comandi}
 \usepackage{geometry} 
+\usepackage{amsmath}
 \geometry{a4paper}
-\usepackage{graphicx}
 \usepackage{amssymb}
 \usepackage{epstopdf}
+\usepackage{xcolor}
+\usepackage{chemformula}
+\title{Models Description}
+\author{giuseppe.calio }
+\date{May 2023}
 \DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
 
 \title{Drift--Diffusion Equations with Chemical Reactions}
-\author{}
+
 
 \begin{document}
 \maketitle
 
+\section{Research plan}
+\begin{enumerate}
+    \item rewrite test\_balcon\_et\_al.m replacing ode23s with ode15s. Write analytic Jacobian.
+    \item extension to more than 2 species
+    \item 1D problem. Constant reaction rates including drift
+    \item 1D problem. Add the dependency of the reaction rates on the reduced electric field
+    \item 1D problem. Add an energy equation for electron ($T_e$). $T_gas=const$. Reaction rates now depends on the electron temperature too
+    \item 1D problem. Add the energy equation for the neutrals and heavy ions.
+    \item ...
+\end{enumerate}
 \section{Reaction Systems}
 
 Given the set of $M$ reactions involving $N$ species
@@ -58,30 +75,25 @@ $$
 
 \section{Models for the Reaction Coefficients}
 
-$c^{b}_i$ and $c^{f}_i$ may depend on temperature, electric field and densities, \dots(add more details) 
+$c^{b}_i$ and $c^{f}_i$ may depend on temperature, electric field and densities, \dots(add more details.. \textcolor{red}{\textbf{??}})
 
-Arrhenius model
-
+Arrhenius model prescribes the dependency of the reaction coefficients on the temperature
 $$
-c^{f}_i = A^{f}_{i} \exp\left( \dfrac{T}{T^{f}_{i}} \right)
+c^{f}_i = A^{f}_{i} \exp\left( -\dfrac{\epsilon_a}{k_B T_{i}} \right)
 $$
-
-\section{Models for the Transport Coefficients}
-
-$D_{k}$ and $\mu_{k}$ may depend on temperature, electric field and densities, \dots(add more details)
-
-Usually they are related by the Stokes--Einstein relation 
-
+where $\epsilon_a$ is the Arrhenius activation energy.
+A better experimental fitting can be obatined as suggest by Vincenti:
 $$
-D_{k} = \dfrac{K_{b} T}{q} \mu_{k}
+c^{f}_i =A^{f}_{i} T^b \exp\left( -\dfrac{\epsilon_a}{k_B T_{i}} \right)
 $$
-
-\section{Energy/Temperature Equations}
-TODO(?)
-
-\section{Boundary Conditions}
-TODO(?)
-
+The backward coefficient can be obtained as:
+$$
+c^{b}_i= c^{f}_i/C_c(T)  
+$$
+where $K_c(T)$ is obtained from the law of mass action:
+$$
+C_c(T)= \frac{\prod_{k=1}^N s_k^{p_{i,k}}}{\prod_{k=1}^N s_k^{r_{i,k}}}
+$$
 
 \section{Models for the Transport Coefficients}
 
