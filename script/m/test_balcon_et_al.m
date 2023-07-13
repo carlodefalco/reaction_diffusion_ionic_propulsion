@@ -26,10 +26,14 @@ x0(idx.("Ar+"))  = 1.0e+6;
 x0(idx.("Ar2+")) = 1.0e+3;
 x0(idx.("Ar*"))  = 1.0e+10;
 
-T0   = 0.;
+T0   = 0;
 Tend = 1.0e-7;
 
-[t, x] = ode23s (@(t, x) compute_change_rates (x, r, idx), [T0 Tend], x0);
+
+o = odeset ('Jacobian', @(t, x)  compute_change_rates_jacobian(x, r, idx),'InitialStep', T0+1e-8);
+[t, y] = ode15s (@(t, x) compute_change_rates (x, r, idx), [T0 Tend], x0, o);
+
+
 
 figure
 for [val, key] = idx
