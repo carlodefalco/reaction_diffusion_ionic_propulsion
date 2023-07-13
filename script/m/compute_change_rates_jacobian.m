@@ -22,15 +22,15 @@
 ##
 ## with forward reaction coefficient cf_i and backward reaction coefficient cb_i
 ##
-## the rate Rf_i of the i-th forward reaction is 
+## the rate Rf_i of the i-th forward reaction is
 ##
 ## Rf_i = cf_i \prod_k s_k^{\left( r_{i,k} \right)}
 ##
-## the rate Rb_i of the i-th forward reaction is 
+## the rate Rb_i of the i-th forward reaction is
 ##
 ## Rb_i = cb_i \prod_k s_k^{\left( p_{i,k} \right)}
 ##
-## the net rate of the i-th reaction is 
+## the net rate of the i-th reaction is
 ##
 ## R_i = Rf_i - Rb_i
 ##
@@ -38,18 +38,18 @@
 ##
 ## \dot{s}_k = \sum_{i=1}^M \left( - Rf_i r_{i,k} + Rf_i p_{i,k}
 ##             - Rb_i p_{i,k} - Rb_i r_{i,k} \right) =
-##             - \sum_{i=1}^M \left( R_i (r_{i,k} - p_{i,k}) \right) 
+##             - \sum_{i=1}^M \left( R_i (r_{i,k} - p_{i,k}) \right)
 ##
 ## the jacobian of \dot{s}_k is given by
 ##
 ## \dfrac{\partial \dot{s}_k}{\partial s_j} = (r_{i,k} - p_{i,k}) \dfrac{\partial R_i}{\partial s_j}
 
 
-function dstate_jac = compute_change_rates_jacobian (state, reactions, index)
+function dstate_jac = compute_change_rates_jacobian(state, reactions, index)
 
   N = numel (state);
   dstate_jac = sparse (N, N);
-  
+
   for the_reaction = reactions(:)'
 
     d_Rfi_d_sj = zeros (1, N);
@@ -57,20 +57,21 @@ function dstate_jac = compute_change_rates_jacobian (state, reactions, index)
       d_Rfi_d_sj(index.(key)) = the_reaction.rate_coeffs(1) * state (index.(key)) ^ (value-1) * value;
     endfor
 
-    Rbi = the_reaction.rate_coeffs(2);
+
+    d_Rbi_d_sj = zeros (1, N);
     for [value, key] = the_reaction.products
-      Rbi *= state (index.(key)) ^ value;
+      d_Rbi_d_sj(index.(key)) = the_reaction.rate_coeffs(2) * state (index.(key)) ^ (value-1) * value;
     endfor
 
-    Ri = Rfi - Rbi;
+    d_Ri_d_sj = d_Rfi_d_sj - d_Rbi_d_sj;
 
     for [value, key] = the_reaction.reactants
-      dstate (index.(key)) -= Ri * value;
+      dstate_jac (index.(key),:) -= d_Ri_d_sj * value;
     endfor
     for [value, key] = the_reaction.products
-      dstate (index.(key)) += Ri * value;
+      dstate_jac (index.(key),:) +=d_Ri_d_sj * value;
     endfor
-    
+
   endfor
 
 endfunction
