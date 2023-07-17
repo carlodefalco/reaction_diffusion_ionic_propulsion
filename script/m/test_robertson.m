@@ -15,38 +15,28 @@
 
 
 addpath (canonicalize_file_name ("../../data"));
-[r, idx] = read_reactions (file_in_loadpath ("balcon_et_al_argon_ionization.json"));
+[r, idx] = read_reactions (file_in_loadpath ("robertson_autocatalysis.json"));
 
 pretty_print_reactions (r);
 
 x0 = zeros (numfields (idx), 1);
-x0(idx.("Ar"))   = 2.5e+19;
-x0(idx.("e"))    = 1.0e+6;
-x0(idx.("Ar+"))  = 1.0e+6;
-x0(idx.("Ar2+")) = 1.0e+3;
-x0(idx.("Ar*"))  = 1.0e+10;
-x0(idx.("h_nu")) = 1.0e+10;
+x0(idx.("A"))  = 2.5e19;
+x0(idx.("B"))  = 1e6;
+x0(idx.("C"))  = 1e6;
 
 T0   = 0;
-Tend = 1.0e-7;
+Tend = 1e6;
 
-M = eye (6);
-
-fun = @(t, x, xdot) (M*xdot - compute_change_rates (x, r, idx));
-function [jx, jxdot] = jacfun (t, x, xdot, M, r, idx)
-  jx = - compute_change_rates_jacobian (x, r, idx);
-  jxdot = M;
-endfunction
-
-o = odeset ('Mass', M, 'MassSingular', 'yes', 'Jacobian', @(t, x, xdot) jacfun (t, x, xdot, M, r, idx));
-[t, x] = ode15i (fun, [T0 Tend], x0, 0*x0, o);
+o = odeset ('RelTol',1e-4, 'AbsTol', [1e-6 1e-10 1e-6], 'Jacobian', @(t, x)  compute_change_rates_jacobian (x, r, idx));
+[t, y] = ode15s (@(t, x) compute_change_rates (x, r, idx),[0 4*logspace(-6,6)], x0, o);
 
 
 
 figure
-for [val, key] = idx
-  semilogy (t(2:end), x(:, val)(2:end))
-  hold all
-endfor
-legend (fieldnames (idx){:}, 'location', 'eastoutside')
+semilogx (t, y(:,1))
+hold all
+semilogx (t, 1e4*y(:,2))
+semilogx (t, y(:,3))
+legend ("A","B*1e4","C")
+
 hold off
