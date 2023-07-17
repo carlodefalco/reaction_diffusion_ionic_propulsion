@@ -55,10 +55,10 @@ function dstate_jac = compute_change_rates_jacobian(state, reactions, index)
   d_Rfi_d_sj=zeros(1,N);;
   d_Rbi_d_sj=zeros(1,N);
    for [value, key] = the_reaction.reactants
-      d_Rfi_d_sj(index.(key)) = the_reaction.rate_coeffs(1) * state(index.(key)) ^ (value-1)* value;
+      d_Rfi_d_sj(index.(key)) = the_reaction.rate_coeffs(1) * state(index.(key)) ^ (value-1)* value;% derivative with respect to the index.(key) concentration
       for [value2, key2] = the_reaction.reactants
         if index.(key2)!=index.(key);
-          d_Rfi_d_sj(index.(key))*=state(index.(key2))^(value2);
+          d_Rfi_d_sj(index.(key))*=state(index.(key2))^(value2); % multiply by the other concentrations wrt no derivative is taken
         else
           d_Rfi_d_sj(index.(key))= d_Rfi_d_sj(index.(key));
         endif
