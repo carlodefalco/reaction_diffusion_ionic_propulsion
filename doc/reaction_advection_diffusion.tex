@@ -9,8 +9,6 @@
 \usepackage{xcolor}
 \usepackage{chemformula}
 \title{Models Description}
-\author{giuseppe.calio }
-\date{May 2023}
 \DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
 
 \title{Drift--Diffusion Equations with Chemical Reactions}
@@ -53,6 +51,11 @@ $$
 \dot{s}_k = \sum_{i=1}^M \left( - R^{f}_i r_{i,k} + R^{f}_i p_{i,k}
              - R^{b}_i p_{i,k} + R^{b}_i r_{i,k} \right) =
              - \sum_{i=1}^M  R_i\ (r_{i,k} - p_{i,k}) 
+$$
+The Jacobian of $\dot{s}_k$ is given by
+
+$$
+\dfrac{\partial \dot{s}_k}{\partial s_j} = -(r_{i,k} - p_{i,k}) \dfrac{\partial R_i}{\partial s_j}
 $$
 
 \section{Drift--Diffusion with Reactions}
@@ -167,7 +170,14 @@ $$
 $$
 \dot{s_C}=R_2^f 
 $$
-
+The jacobian of this system is:
+\begin{equation}
+\begin{bmatrix} J
+\end{bmatrix}=
+\begin{bmatrix} -0.04&10^4s_C&10^4 s_B\\0.04&-(6*10^7+10^4s_C)s_B&-10^4s_B\\0&-6*10^7s_B&0
+\end{bmatrix}
+\notag
+\end{equation}
 This system of equation in the input file in $.json$ format reads:\\
 \{\\
 $"reactants" : \{ "A" : 1\}$\\
