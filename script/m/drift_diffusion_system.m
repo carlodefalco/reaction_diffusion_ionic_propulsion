@@ -14,106 +14,81 @@
 ## along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 %% Solve :
-%%   n' = div (mun Vth (grad n - grad phi/Vth n))
-%%   p' = div (mun Vth (grad p + grad phi/Vth p))
-%%   0  = -div (epsilon grad (phi)) - q * (p - n)
-%%   n(0) = n(L) = p(0) = p(L) = 0
+%%   n_k' = div (mun Vth (grad n_k - grad phi/Vth n_k))
+%%   0  = -div (epsilon grad (phi)) - q sum_k { z_k  n_k}
+%%   n_k(0) = n_k(L)= 0
 %%   phi(0) = 0 phi(L) = V0(t)
 
 pkg load fpl bim msh
+
+species(1).id= 'e';
+species(1).mobility=1e-3;
+species(1).valence=-1;
+species(1).n0=[];
+species(1).density=[];
+
+species(2).id= 'p';
+species(2).mobility=1e-4;
+species(2).valence=1;
+species(2).n0=[];
+species(2).density=[];
+
+species(3).id= 'Ar+';
+species(3).mobility=1e-5;
+species(3).valence=1;
+species(3).n0=[];
+species(3).density=[];
+
+
+
+
 
 L = 2e-3;
 N = 81;
 x = linspace (0, L, N).';
 T0 = 0.999e-4;
 T1 = 1.02e-4;
-
-function dy = odefun (t, y, x, N, V0, q, epsilon, Vth, mun, mup)
-
-  V0t = V0(t);
-
-  n   = y(1:N);
-  p   = y(N+1:2*N);
-  
-  A00 = bim1a_laplacian (x, epsilon, 1);
-  M   = bim1a_reaction (x, 1, 1);
-  b   = q*(M*(p - n));
-  phi = zeros (N, 1);
-  phi([1 N]) = V0t;
-
-  phi(2:end-1) = A00(2:end-1, 2:end-1) \ (b(2:end-1)-A00(2:end-1, :) * phi);
-  
-  An = - bim1a_advection_diffusion (x, mun*Vth, 1, 1, phi/Vth);
-  dn = zeros (N, 1);
-  dn(2:end-1) = An(2:end-1, :) * n;
-  dn = M \ dn;
-
-  Ap = - bim1a_advection_diffusion (x, mup*Vth, 1, 1, -phi/Vth);
-  dp = zeros (N, 1);
-  dp(2:end-1) = Ap(2:end-1, :) * p;
-  dp = M \ dp;
-  
-  dy = [dn; dp];
-  
-endfunction 
-
-function J = jacobian (t, y, x, N, V0, q, epsilon, Vth, mun, mup)
-
-  V0t = V0(t);
-
-  n   = y(1:N);
-  p   = y(N+1:2*N);
-
-  A00 = bim1a_laplacian (x, epsilon, 1);
-  M   = bim1a_reaction (x, 1, 1);
-  b   = q*(M*(p - n));
-  phi = zeros (N, 1);
-  phi([1 N]) = V0t;
-
-  phi(2:end-1) = A00(2:end-1, 2:end-1) \ (b(2:end-1)-A00(2:end-1, :) * phi);
-
-  
-  J = sparse (2*N, 2*N);
-
-  An = - bim1a_advection_diffusion (x, mun*Vth, 1, 1, phi/Vth);
-  An([1 end], :) = 0;
-  An([1 end], [1 end]) = 1;
-  
-  Ap = - bim1a_advection_diffusion (x, mup*Vth, 1, 1, -phi/Vth);
-  Ap([1 end], :) = 0;
-  Ap([1 end], [1 end]) = 1;
-
-  
-  J(1:N, 1:N) = M\An;
-  J(N+1:2*N, N+1:2*N) = M\Ap;
-  
-endfunction
+T_vec=linspace (T0, T1, 40);
 
 V0 = @(t) 5000*[zeros(size(t)); ((t-1e-4)*1e6 .* ((t>=1e-4)&(t<=1.01e-4)) + 1.0 .* (t>1.01e-4))];
-q  = 1.6e-19;
-epsilon = 8.8e-12;
-mun = 1e-3;
-mup = 1e-3;
+q  = 1.6e-19; %elementary charge
+epsilon = 8.8e-12; %dielectric constant in vacuum
+%% Diffusion coefficient according to Einstein–Smoluchowski relations is D_k= mu_k Vth
 Vth = 26e-3;
 
-n0 = x .* (L - x) * 2e17 / (L/2)^2;
-p0 = x .* (L - x) * 2e17 / (L/2)^2;
+N_species=size(species,2);
+y0=[];
 
-y0 = [n0; p0];
-o = odeset ('Jacobian', @(t, y) jacobian (t, y, x, N, V0, q, epsilon, Vth, mun, mup),
+
+%for k= 1:N_species
+%  species(k).n0= x .* (L - x)*k * 2e17 / (L/2)^2;
+%  y0=[y0; species(k).n0];
+%endfor
+species(1).n0 = x .* (L - x) * 2e17 / (L/2)^2;
+species(2).n0 = x .* (L - x) * 2e17 / (L/2)^2;
+species(3).n0 = x .* (L - x) * 2e15 / (L/2)^2;
+for k= 1:N_species
+  y0=[y0; species(k).n0];
+endfor
+o = odeset ('Jacobian', @(t, y) jacobian (t, y, x, N, N_species, V0, q, epsilon, Vth, species),
 	    'InitialStep', 1e-4-T0);
-[t, y] = ode15s (@(t, y) odefun (t, y, x, N, V0, q, epsilon, Vth, mun, mup),
-		 linspace (T0, T1, 100), y0, o);
 
-n = y(:, 1:N);
-p = y(:, N+(1:N));
+[t, y] = ode15s (@(t, y) odefun (t, y, x, N, N_species, V0, q, epsilon, Vth, species),
+		 T_vec, y0,o);
+
+
+for k= 1:N_species
+    species(k).density = y(:, 1+ N*(k-1):k*N);
+endfor
+
 V = V0(t')(2, :);
+
 for ii = 1 : numel (t)
   subplot(1, 2, 1)
-  plot (x,n(ii, :), x, p(ii, :))
+  plot (x,species(1).density(ii, 1:N), x,species(2).density(ii, 1:N), x,species(3).density(ii, 1:N))
   title (sprintf ("%g", t(ii)));
-  legend ('n', 'p');
-  axis ([min(x) max(x) 0 max(max(n0))]);
+  legend ('e', 'p', 'Ar');
+  axis ([min(x) max(x) 0 max(max(species(1).n0))]);
   subplot(1, 2, 2)
   plot (t, V, t(ii), V(ii), 'ro')
   title ('V')
