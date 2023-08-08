@@ -45,10 +45,10 @@
 ## \dfrac{\partial \dot{s}_k}{\partial s_j} = -(r_{i,k} - p_{i,k}) \dfrac{\partial R_i}{\partial s_j}
 
 
-function dstate_jac = compute_change_rates_jacobian(state, reactions, index)
+function [dF_dstate, dF_ddstate] = compute_change_rates_jacobian(state, dstate, reactions, index)
 
   N = numel (state);
-  dstate_jac = sparse(N, N);
+  dstate_jac = zeros(N, N);
 
   for the_reaction = reactions(:)'
 
@@ -84,7 +84,10 @@ function dstate_jac = compute_change_rates_jacobian(state, reactions, index)
     for [value, key] = the_reaction.products
       dstate_jac (index.(key),:) += d_Ri_d_sj * value;
     endfor
-
   endfor
+ dF_dstate=-dstate_jac;
+
+ dF_ddstate=diag([ones(N,1)]);
+
 
 endfunction
