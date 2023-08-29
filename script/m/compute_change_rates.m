@@ -49,7 +49,7 @@
 
 
 
-function implicit_eqs = compute_change_rates (state, dstate, reactions, index)
+function dstate = compute_change_rates (state, reactions, index)
   Ri_vec=[];
   sum_Ri = zeros (size (state));
  for the_reaction = reactions(:)'
@@ -76,7 +76,8 @@ function implicit_eqs = compute_change_rates (state, dstate, reactions, index)
     endfor
 
  endfor
-  implicit_eqs = dstate-sum_Ri;
+
+ dstate=sum_Ri;
 
 
 endfunction
