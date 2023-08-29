@@ -20,7 +20,17 @@ addpath (canonicalize_file_name ("../"));
 
 pretty_print_reactions (r);
 
+<<<<<<< HEAD:script/m/Test_onlychemistry/test_balcon_et_al.m
 x0 = zeros (numfields (idx), 1); %by defaults the photon initial density is zero.
+=======
+x0 = zeros (numfields (idx), 1);
+x0(idx.("Ar"))   = 2.5e+19;
+x0(idx.("e"))    = 1.0e+6;
+x0(idx.("Ar+"))  = 1.0e+6;
+x0(idx.("Ar2+")) = 1.0e+3;
+x0(idx.("Ar*"))  = 1.0e+10;
+x0(idx.("h_nu")) = 1.0e+10;
+>>>>>>> 5a5ba9f568403fa1dfaf18e2f1e8fa3588880a21:script/m/test_balcon_et_al.m
 
 x0(idx.("Ar"))   = 2.5e+19/2.5e+19;
 x0(idx.("e"))    = 1.0e+6/2.5e+19;
@@ -31,12 +41,29 @@ x0(idx.("Ar*"))  = 1.0e+10/2.5e+19;
 
 x0dot=zeros(numfields (idx), 1);
 T0   = 0;
+<<<<<<< HEAD:script/m/Test_onlychemistry/test_balcon_et_al.m
 Tend = 1.0e-5;
 T=linspace(T0, Tend, 200);
 M   = bim1a_reaction (x, 1, 1);
 eqs = @(t, x, xdot) compute_change_rates_implicit (x, xdot, r, idx);
 options = odeset('RelTol', 10.0^(-7), 'AbsTol', 10.0^(-7), 'Jacobian', {@implicit_change_rates_jacobian, M});
 [t, y] = ode15i ( eqs, T, x0, x0dot);
+=======
+Tend = 1.0e-7;
+
+M = eye (6);
+
+fun = @(t, x, xdot) (M*xdot - compute_change_rates (x, r, idx));
+function [jx, jxdot] = jacfun (t, x, xdot, M, r, idx)
+  jx = - compute_change_rates_jacobian (x, r, idx);
+  jxdot = M;
+endfunction
+
+o = odeset ('Mass', M, 'MassSingular', 'yes', 'Jacobian', @(t, x, xdot) jacfun (t, x, xdot, M, r, idx));
+[t, x] = ode15i (fun, [T0 Tend], x0, 0*x0, o);
+
+
+>>>>>>> 5a5ba9f568403fa1dfaf18e2f1e8fa3588880a21:script/m/test_balcon_et_al.m
 
 y=y.*2.5e+19;
 figure
