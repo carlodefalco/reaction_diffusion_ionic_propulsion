@@ -5,31 +5,29 @@
 %%   n_k(0) = n_k(L)= 0
 %%   phi(0) = 0 phi(L) = V0(t)
 %%   this function builds the jacobian of the system of equation
-function Jac = system_jacobian (t, y, reactions, index, x, N, V0, q, epsilon, Vth, mobility, valence)
+function [Jac, DJac] = system_jacobian (t, y, ydot, reactions, index, x, N, V0, q, epsilon, Vth, mobility, valence)
 
   V0t = V0(t);
   N_species= numfields(index);
   rearrange_y=zeros(N, N_species);
-  for k=1:numel(x)
-    for ii=1:N_species
-      rearrange_y(k, ii)= y(k+(ii-1)*N);
+  for ii=1:N
+    for k=1:N_species
+      rearrange_y(ii, k)= y(ii+(k-1)*N);
     endfor
   endfor
-  Jabian_reaction = sparse (N_species*N, N_species*N);
-  for k=1:numel(x)
-   jacobian_local=compute_change_rates_jacobian(rearrange_y(k,:),reactions,index);
-   for ii=1:N_species
-  Jacobian_reaction(k:N:k+N*(N_species-1),k:N:k+N*(N_species-1))=jacobian_local;
-   endfor
-  endfor
+##  Jabian_reaction = sparse (N_species*N, N_species*N);
+##
+##   for ii=1:N
+##     Jacobian_reaction(ii:N:ii+N*(N_species-1), ii:N:ii+N*(N_species-1)) = compute_change_rates_jacobian(rearrange_y(ii,:), reactions, index);
+##   endfor
 
   A00 = bim1a_laplacian (x, epsilon, 1);
   M   = bim1a_reaction (x, 1, 1);
-  a=zeros(N,1);
+  sum_k=zeros(N,1);
   for k=1:N_species
-    a+= rearrange_y(:,k).*valence(k);
+    sum_k+= rearrange_y(:,k).*valence(k);
   endfor
-  b=q*M*a;
+  b=q*M*sum_k;
   phi = zeros (N, 1);
   phi([1 N]) = V0t;
 
@@ -45,5 +43,9 @@ function Jac = system_jacobian (t, y, reactions, index, x, N, V0, q, epsilon, Vt
 
     J(1+(N*(k-1)): k*N, 1+(N*(k-1)):k*N) = M\An;
   endfor
-  Jac=+J;
+  for k=1:N_species
+    Mass(1+(N*(k-1)): k*N, 1+(N*(k-1)):k*N) = M;
+  endfor
+  DJac= Mass;
+  Jac=J;
 endfunction

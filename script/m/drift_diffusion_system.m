@@ -28,18 +28,18 @@ addpath (canonicalize_file_name ("../../data"));
 
 %% initialzation of density, valence number and mobility
 state0 = zeros (numfields (idx), 1);
-state0(idx.("Ar"))   = 2.5e+19;
-state0(idx.("e"))    = 1.0e+6;
-state0(idx.("Ar+"))  = 1.0e+6;
-state0(idx.("Ar2+")) = 1.0e+3;
-state0(idx.("Ar*"))  = 1.0e+10;
+state0(idx.("Ar"))   = 2.5e+19/2.5e+19;
+state0(idx.("e"))    = 1.0e+6/2.5e+19;
+state0(idx.("Ar+"))  = 1.0e+6/2.5e+19;
+state0(idx.("Ar2+")) = 1.0e+3/2.5e+19;
+state0(idx.("Ar*"))  = 1.0e+10/2.5e+19;
 
 %%NOTE THAT THE MOBILITY SHOULD BE COMPUTED NOT IMPOSED: this is for a try
 mobility = zeros (numfields (idx), 1);
 mobility(idx.("Ar"))   = 1e-4;
-mobility(idx.("e"))    = 1e-4;
-mobility(idx.("Ar+"))  = 1e-4;
-mobility(idx.("Ar2+")) = 1e-4;
+mobility(idx.("e"))    = 1e-2;
+mobility(idx.("Ar+"))  = 1e-3;
+mobility(idx.("Ar2+")) = 1e-3;
 mobility(idx.("Ar*"))  = 1e-4;
 
 valence = zeros (numfields (idx), 1);
@@ -64,17 +64,6 @@ q  = 1.6e-19; %elementary charge
 epsilon = 8.8e-12; %dielectric constant in vacuum
 % Diffusion coefficient according to Einstein–Smoluchowski relations is D_k= mu_k Vth
 Vth = 26e-3;
-
-
-%% build the system
-M   = bim1a_reaction (x, 1, 1);
-for k=1:numel(state0)
-    Mass(1+(N*(k-1)): k*N, 1+(N*(k-1)):k*N) = M;
-endfor
-fun=@(t,y, ydot) drift_diffusion_reaction_system (t, y, ydot, r, idx, x, N, V0, q, epsilon, Vth, mobility, valence);
-J=@(t,y)system_jacobian (t, y, r, idx, x, N, V0, q, epsilon, Vth, mobility, valence);
-options = odeset('RelTol', 10.0^(-5), 'AbsTol', 10.0^(-7), 'Jacobian', {@(t,y) system_jacobian (t, y, r, idx, x, N, V0, q, epsilon, Vth, mobility, valence), Mass});
-
 %%grid initialzation
 y0=[];
 for k=1:length(elements)
@@ -82,6 +71,17 @@ for k=1:length(elements)
 endfor
 
 y0dot=zeros(N*length(elements),1);
+
+
+%% build the system
+M   = bim1a_reaction (x, 1, 1);
+for k=1:length(elements)
+    Mass(1+(N*(k-1)): k*N, 1+(N*(k-1)):k*N) = M;
+endfor
+fun=@(t,y, ydot) drift_diffusion_reaction_system (t, y, ydot, r, idx, x, N, V0, q, epsilon, Vth, mobility, valence);
+options = odeset('RelTol', 10.0^(-5), 'AbsTol', 10.0^(-7), 'Jacobian', @(t,y, ydot) system_jacobian (t, y, ydot, r, idx, x, N, V0, q, epsilon, Vth, mobility, valence));
+
+
 %integration in time
 [t, y] = ode15i (fun, T_vec, y0, y0dot, options);
 

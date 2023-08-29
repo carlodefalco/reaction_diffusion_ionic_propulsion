@@ -39,12 +39,7 @@
 ## \dot{s}_k = \sum_{i=1}^M \left( - Rf_i r_{i,k} + Rf_i p_{i,k}
 ##             - Rb_i p_{i,k} - Rb_i r_{i,k} \right) =
 ##             - \sum_{i=1}^M \left( R_i (r_{i,k} - p_{i,k}) \right)
-##the system is rw-written in an implicit form of type F(t, y, ydot)=0
-##So:
-## \dot{s}_k - \sum_{i=1}^M \left( - Rf_i r_{i,k} + Rf_i p_{i,k}
-##             - Rb_i p_{i,k} - Rb_i r_{i,k} \right) =
-##             - \sum_{i=1}^M \left( R_i (r_{i,k} - p_{i,k}) \right)=0
-##the last equations is replaced with a costraint equation (conservation of mass)
+
 
 
 
