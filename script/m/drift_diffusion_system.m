@@ -21,74 +21,87 @@
 
 pkg load fpl bim msh
 
-species(1).id= 'e';
-species(1).mobility=1e-3;
-species(1).valence=-1;
-species(1).n0=[];
-species(1).density=[];
+addpath (canonicalize_file_name ("../../data"));
+[r, idx] = read_reactions (file_in_loadpath ("balcon_et_al_argon_ionization.json"));
 
-species(2).id= 'p';
-species(2).mobility=1e-4;
-species(2).valence=1;
-species(2).n0=[];
-species(2).density=[];
+%pretty_print_reactions (r);
 
-species(3).id= 'Ar+';
-species(3).mobility=1e-5;
-species(3).valence=1;
-species(3).n0=[];
-species(3).density=[];
+%% initialzation of density, valence number and mobility
+state0 = zeros (numfields (idx), 1);
+state0(idx.("Ar"))   = 2.5e+19;
+state0(idx.("e"))    = 1.0e+6;
+state0(idx.("Ar+"))  = 1.0e+6;
+state0(idx.("Ar2+")) = 1.0e+3;
+state0(idx.("Ar*"))  = 1.0e+10;
 
+%%NOTE THAT THE MOBILITY SHOULD BE COMPUTED NOT IMPOSED: this is for a try
+mobility = zeros (numfields (idx), 1);
+mobility(idx.("Ar"))   = 1e-4;
+mobility(idx.("e"))    = 1e-4;
+mobility(idx.("Ar+"))  = 1e-4;
+mobility(idx.("Ar2+")) = 1e-4;
+mobility(idx.("Ar*"))  = 1e-4;
 
+valence = zeros (numfields (idx), 1);
+valence(idx.("Ar"))   = 0;
+valence(idx.("e"))    = -1;
+valence(idx.("Ar+"))  = 1;
+valence(idx.("Ar2+")) = +1;
+valence(idx.("Ar*"))  = 0;
 
+elements= fieldnames(idx);
 
-
+%% Problem Data
 L = 2e-3;
 N = 81;
-x = linspace (0, L, N).';
-T0 = 0.999e-4;
+x = linspace (0, L, N)';
+T0 = 0.99e-4;
 T1 = 1.02e-4;
-T_vec=linspace (T0, T1, 40);
+T_vec=linspace (T0, T1, 2);
 
 V0 = @(t) 5000*[zeros(size(t)); ((t-1e-4)*1e6 .* ((t>=1e-4)&(t<=1.01e-4)) + 1.0 .* (t>1.01e-4))];
 q  = 1.6e-19; %elementary charge
 epsilon = 8.8e-12; %dielectric constant in vacuum
-%% Diffusion coefficient according to Einstein–Smoluchowski relations is D_k= mu_k Vth
+% Diffusion coefficient according to Einstein–Smoluchowski relations is D_k= mu_k Vth
 Vth = 26e-3;
 
-N_species=size(species,2);
-y0=[];
 
-
-%for k= 1:N_species
-%  species(k).n0= x .* (L - x)*k * 2e17 / (L/2)^2;
-%  y0=[y0; species(k).n0];
-%endfor
-species(1).n0 = x .* (L - x) * 2e17 / (L/2)^2;
-species(2).n0 = x .* (L - x) * 2e17 / (L/2)^2;
-species(3).n0 = x .* (L - x) * 2e15 / (L/2)^2;
-for k= 1:N_species
-  y0=[y0; species(k).n0];
+%% build the system
+M   = bim1a_reaction (x, 1, 1);
+for k=1:numel(state0)
+    Mass(1+(N*(k-1)): k*N, 1+(N*(k-1)):k*N) = M;
 endfor
-o = odeset ('Jacobian', @(t, y) jacobian (t, y, x, N, N_species, V0, q, epsilon, Vth, species),
-	    'InitialStep', 1e-4-T0);
+fun=@(t,y, ydot) drift_diffusion_reaction_system (t, y, ydot, r, idx, x, N, V0, q, epsilon, Vth, mobility, valence);
+J=@(t,y)system_jacobian (t, y, r, idx, x, N, V0, q, epsilon, Vth, mobility, valence);
+options = odeset('RelTol', 10.0^(-5), 'AbsTol', 10.0^(-7), 'Jacobian', {@(t,y) system_jacobian (t, y, r, idx, x, N, V0, q, epsilon, Vth, mobility, valence), Mass});
 
-[t, y] = ode15s (@(t, y) odefun (t, y, x, N, N_species, V0, q, epsilon, Vth, species),
-		 T_vec, y0,o);
+%%grid initialzation
+y0=[];
+for k=1:length(elements)
+  y0=[y0; x.* (L - x)* state0(idx.(elements{k}))/ (L/2)^2];
+endfor
 
+y0dot=zeros(N*length(elements),1);
+%integration in time
+[t, y] = ode15i (fun, T_vec, y0, y0dot, options);
 
-for k= 1:N_species
+%% rearrenge y vector to plot results by species
+for k= 1:length(elements)
     species(k).density = y(:, 1+ N*(k-1):k*N);
 endfor
 
 V = V0(t')(2, :);
 
 for ii = 1 : numel (t)
+  figure()
   subplot(1, 2, 1)
-  plot (x,species(1).density(ii, 1:N), x,species(2).density(ii, 1:N), x,species(3).density(ii, 1:N))
+  for k= 1:length(elements)
+  plot (x,species(k).density(ii, 1:N),'LineWidth', 2)
+  hold on
+  endfor
   title (sprintf ("%g", t(ii)));
-  legend ('e', 'p', 'Ar');
-  axis ([min(x) max(x) 0 max(max(species(1).n0))]);
+  legend (elements);
+  axis ([min(x) max(x) 0 max(max(state0(1)))]);
   subplot(1, 2, 2)
   plot (t, V, t(ii), V(ii), 'ro')
   title ('V')
