@@ -45,7 +45,7 @@
 ## \dfrac{\partial \dot{s}_k}{\partial s_j} = -(r_{i,k} - p_{i,k}) \dfrac{\partial R_i}{\partial s_j}
 
 
-function dstate_jac = implicit_change_rates_jacobian(state, reactions, index)
+function [dstate_jac, ddstate_jac] = implicit_change_rates_jacobian(t, state, dstate, reactions, index)
 
     N = numel (state);
     dstate_jac = zeros(N, N);
@@ -86,4 +86,5 @@ function dstate_jac = implicit_change_rates_jacobian(state, reactions, index)
      endfor
     endfor
     dstate_jac=-dstate_jac;
+    ddstate_jac= sparse(eye(N));
 endfunction

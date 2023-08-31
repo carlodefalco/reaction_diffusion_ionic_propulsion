@@ -35,8 +35,8 @@ Tend = 1.0e-5;
 T=linspace(T0, Tend, 200);
 
 eqs = @(t, x, xdot) compute_change_rates_implicit (x, xdot, r, idx);
-options = odeset('RelTol', 10.0^(-7), 'AbsTol', 10.0^(-7), 'Jacobian', {@implicit_change_rates_jacobian, eye(6)});
-[t, y] = ode15i ( eqs, T, x0, x0dot);
+options = odeset('RelTol', 10.0^(-7), 'AbsTol', 10.0^(-7), 'Jacobian', @(t, x, xdot) implicit_change_rates_jacobian(t, x, xdot, r, idx));
+[t, y] = ode15i ( eqs, T, x0, x0dot, options);
 
 y=y.*2.5e+19;
 figure
