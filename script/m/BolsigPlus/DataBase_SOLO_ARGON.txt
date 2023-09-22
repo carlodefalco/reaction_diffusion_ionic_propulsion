@@ -1,0 +1,223 @@
+Downloaded on 4 Jun 2013. All rights reserved.
+
+1)  The cross sections in this file are taken from different databases on LXCat, as indicated in the header for each species. 
+The cross sections in this file are used in-house by the group GREPHE at LAPLACE in Toulouse, France. We recomment that
+users consult the LXCat site and the documentation on that site to which of the available datasets are best adapted
+to the problem of interest.  
+
+2)  These data are being made freely available to the community.  In exchange, we require that users make proper reference to the
+LXCat site, to the particular database containing the data, and to original references as listed below in the header for each species. 
+
+
+EACH COLLISION PROCESS IS DEFINED BY A BLOCK CONSISTING OF
+
+1st line
+Keyword in capitals indicating the type of the collision. Possible collision types are 'elastic', 'effective',
+'excitation', 'ionization', or 'attachment' (capital letters required, key words are case sensitive), where 'elastic' is
+used to denote the elastic momentum transfer cross section and where 'effective' denotes the total momentum transfer
+cross section (sum of elastic momentum transfer and total inelastic cross sections). The latter is useful for solving
+the Boltzmann equation in the 2-term approximation.
+
+2nd line
+Name of the target particle species. This name is a character string, freely chosen by the user, e.g. 'Ar'. Optionally
+for excitation processes, the name of the corresponding excited state can be specified on the same line, separated from
+the first name either by arrow '->' or by double-head arrow '', e.g. 'Ar -> Ar*' and 'Ar  Ar*', respectively. In the
+later case BOLSIG+ will automatically define the inverse superelastic process, constructing the superelastic
+cross-section by detailed balancing, and considering the indicated excited state as the target. In this case, the ratio
+of statistical weights must be input in the 3rd line (see below).  Alternatively, superelastic collisions could be
+defined explicitly as excitation collisions with a negative electron energy loss with user input cross sections and
+species name, 'Ar*', for example.
+
+3rd line
+For elastic and effective collisions, the ratio of the electron mass to the target particle mass. For excitation or
+ionization collisions, the electron energy loss (nominally the threshold energy) in eV. For attachment, the 3rd line is
+missing. In case of an excitation process where an excited state has been indicated on the 2nd line using double-head
+arrow '', the 3rd line must specify also ratio of the statistical weights of the final state to the initial state as the
+second parameter in 3rd line; this is needed by BOLSIG+ to calculate the de-excitation cross-section.
+
+from 4th line (optionally)
+User comments and reference information, maximum 100 lines. ZDPlasKin reaction label could be indicated here, for
+example. The only constraint on format is that these comment lines must not start with a number.
+
+Finally
+Table of the cross section as a function of energy. The table starts and ends by a line of dashes '------' (at least 5),
+and has otherwise two numbers per line: the energy in eV and the cross section in m2.
+
+------------------------------------------------------------
+
+COMMENT
+Ar
+References : 
+1) Yamabe, Buckman, and Phelps, Phys. Rev. 27, 1345 (1983). Revised Oct 1997
+2) PHELPS database,http://www.lxcat.laplace.univ-tlse.fr, retrieved June 4, 2013.
+-----------------------------------------------------------------------------------------------------------------------
+
+EFFECTIVE
+Ar
+  1.360e-5 / mass ratio
+COMMENT: EFFECTIVE MOMENTUM-TRANSFER CROSS SECTION
+UPDATED: 2011-06-06 18:21:14
+------------------------------------------------------------
+ 0.0000e+0	7.5000e-20
+ 1.0000e-3	7.5000e-20
+ 2.0000e-3	7.1000e-20
+ 3.0000e-3	6.7000e-20
+ 5.0000e-3	6.1000e-20
+ 7.0000e-3	5.4000e-20
+ 8.5000e-3	5.0500e-20
+ 1.0000e-2	4.6000e-20
+ 1.5000e-2	3.7500e-20
+ 2.0000e-2	3.2500e-20
+ 3.0000e-2	2.5000e-20
+ 4.0000e-2	2.0500e-20
+ 5.0000e-2	1.7300e-20
+ 7.0000e-2	1.1300e-20
+ 1.0000e-1	5.9000e-21
+ 1.2000e-1	4.0000e-21
+ 1.5000e-1	2.3000e-21
+ 1.7000e-1	1.6000e-21
+ 2.0000e-1	1.0300e-21
+ 2.5000e-1	9.1000e-22
+ 3.0000e-1	1.5300e-21
+ 3.5000e-1	2.3500e-21
+ 4.0000e-1	3.3000e-21
+ 5.0000e-1	5.1000e-21
+ 7.0000e-1	8.6000e-21
+ 1.0000e+0	1.3800e-20
+ 1.2000e+0	1.6600e-20
+ 1.3000e+0	1.8200e-20
+ 1.5000e+0	2.1000e-20
+ 1.7000e+0	2.3000e-20
+ 1.9000e+0	2.5000e-20
+ 2.1000e+0	2.8000e-20
+ 2.2000e+0	2.9000e-20
+ 2.5000e+0	3.3000e-20
+ 2.8000e+0	3.8000e-20
+ 3.0000e+0	4.1000e-20
+ 3.3000e+0	4.5000e-20
+ 3.6000e+0	4.9000e-20
+ 4.0000e+0	5.4000e-20
+ 4.5000e+0	6.1000e-20
+ 5.0000e+0	6.7000e-20
+ 6.0000e+0	8.1000e-20
+ 7.0000e+0	9.6000e-20
+ 8.0000e+0	1.1700e-19
+ 1.0000e+1	1.5000e-19
+ 1.2000e+1	1.5200e-19
+ 1.5000e+1	1.4100e-19
+ 1.7000e+1	1.3100e-19
+ 2.0000e+1	1.1000e-19
+ 2.5000e+1	9.4500e-20
+ 3.0000e+1	8.7400e-20
+ 5.0000e+1	6.9000e-20
+ 7.5000e+1	5.8500e-20
+ 1.0000e+2	5.2500e-20
+ 1.5000e+2	4.2400e-20
+ 2.0000e+2	3.7600e-20
+ 3.0000e+2	3.0200e-20
+ 5.0000e+2	2.1000e-20
+ 7.0000e+2	1.6400e-20
+ 1.0000e+3	1.2100e-20
+ 1.5000e+3	8.8000e-21
+ 2.0000e+3	6.6000e-21
+ 3.0000e+3	4.5000e-21
+ 5.0000e+3	3.1000e-21
+ 7.0000e+3	2.3000e-21
+ 1.0000e+4	1.7500e-21
+------------------------------------------------------------
+
+EXCITATION
+Ar -> Ar*(11.5eV)
+  1.150e+1   / threshold energy
+COMMENT: All excitation is grouped into this one level.
+UPDATED: 2010-06-23 11:41:34
+------------------------------------------------------------
+ 1.1500e+1	 0.0000e+0
+ 1.2700e+1	7.0000e-22
+ 1.3700e+1	1.4100e-21
+ 1.4700e+1	2.2800e-21
+ 1.5900e+1	3.8000e-21
+ 1.6500e+1	4.8000e-21
+ 1.7500e+1	6.1000e-21
+ 1.8500e+1	7.5000e-21
+ 1.9900e+1	9.2000e-21
+ 2.2200e+1	1.1700e-20
+ 2.4700e+1	1.3300e-20
+ 2.7000e+1	1.4200e-20
+ 3.0000e+1	1.4400e-20
+ 3.3000e+1	1.4100e-20
+ 3.5300e+1	1.3400e-20
+ 4.2000e+1	1.2500e-20
+ 4.8000e+1	1.1600e-20
+ 5.2000e+1	1.1100e-20
+ 7.0000e+1	9.4000e-21
+ 1.0000e+2	7.6000e-21
+ 1.5000e+2	6.0000e-21
+ 2.0000e+2	5.0500e-21
+ 3.0000e+2	3.9500e-21
+ 5.0000e+2	2.8000e-21
+ 7.0000e+2	2.2500e-21
+ 1.0000e+3	1.7700e-21
+ 1.5000e+3	1.3600e-21
+ 2.0000e+3	1.1000e-21
+ 3.0000e+3	8.3000e-22
+ 5.0000e+3	5.8000e-22
+ 7.0000e+3	4.5000e-22
+ 1.0000e+4	3.5000e-22
+------------------------------------------------------------
+
+IONIZATION
+Ar -> Ar^+
+  1.580e+1 / threshold energy
+COMMENT: RAPP-SCHRAM
+UPDATED: 2010-03-02 16:19:07
+------------------------------------------------------------
+ 1.5800e+1	 0.0000e+0
+ 1.6000e+1	2.0200e-22
+ 1.7000e+1	1.3400e-21
+ 1.8000e+1	2.9400e-21
+ 2.0000e+1	6.3000e-21
+ 2.2000e+1	9.3000e-21
+ 2.3750e+1	1.1500e-20
+ 2.5000e+1	1.3000e-20
+ 2.6500e+1	1.4500e-20
+ 3.0000e+1	1.8000e-20
+ 3.2500e+1	1.9900e-20
+ 3.5000e+1	2.1700e-20
+ 3.7500e+1	2.3100e-20
+ 4.0000e+1	2.3900e-20
+ 5.0000e+1	2.5300e-20
+ 5.5000e+1	2.6000e-20
+ 1.0000e+2	2.8500e-20
+ 1.5000e+2	2.5200e-20
+ 2.0000e+2	2.3900e-20
+ 3.0000e+2	2.0000e-20
+ 5.0000e+2	1.4500e-20
+ 7.0000e+2	1.1500e-20
+ 1.0000e+3	8.6000e-21
+ 1.5000e+3	6.4000e-21
+ 2.0000e+3	5.2000e-21
+ 3.0000e+3	3.6000e-21
+ 5.0000e+3	2.4000e-21
+ 7.0000e+3	1.8000e-21
+ 1.0000e+4	1.3500e-21
+------------------------------------------------------------
+
+IONIZATION
+Ar* -> Ar^+
+ 4.200000e+0
+/SPECIES: e / Ar*
+COMMENT: 4.2 EV |KCp. A.J.DIXON..J.PHYS.B9,2617,1976.
+UPDATED: 2017-01-18 10:50:58
+
+------------------------------------------------------------
+ 4.200000e+0	0.000000e+0
+ 6.000000e+0	5.000000e-20
+ 8.000000e+0	8.000000e-20
+ 1.000000e+1	8.500000e-20
+ 1.500000e+1	8.200000e-20
+ 2.000000e+1	8.000000e-20
+ 4.000000e+1	6.700000e-20
+ 1.000000e+2	4.000000e-20
+ 3.000000e+2	2.000000e-20
+------------------------------------------------------------
