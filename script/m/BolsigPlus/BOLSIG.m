@@ -24,33 +24,33 @@ ionization_degree= y./n_tot;
 %BOLSIG SIMULATION
 maxRUN=1000; %max number of successive simulation that BOLSIG+ can perform
 nRUN=ceil(numel(x)/maxRUN);
-for ii=1:nRUN
-  %create a .txt file with 1000 variables value at most
-  bolsigVAR=sprintf("bolsigVAR%d.txt", ii)
-  fid = fopen( bolsigVAR , 'wt' );
-  %if the number of residual values of VAR is less then 1000 the file txt is built accounting for it
-  if (numel(x)-ii*maxRUN>=0)
-    end_run=ii*maxRUN;
-  else
-    end_run=numel(x);
-  endif
-    fprintf(fid, '%7.0f. %14.0e %24.0e %28.0e \n',...
-            [x(1 +(ii-1)*maxRUN:end_run),ionization_degree(1 +(ii-1)*maxRUN:end_run),...
-             y(1 +(ii-1)*maxRUN:end_run),z(1 +(ii-1)*maxRUN:end_run)]');
-
-  %put the values of VAR in the .dat input file for BOLSIG
-  input_empty=fileread("inputARGON_empty.dat"); %read the precompiled input in which some parts needs to be fullfilled
-  run_cond=fileread(bolsigVAR);
-  outputname=sprintf("output%d.dat",ii);
-  input_file_new=strrep(input_empty, "/putVARhere", run_cond);
-  input_file_new=strrep(input_file_new, "namefile.dat", outputname);
-  input_full=sprintf("inputARGON%d.dat", ii)
-  fileid=fopen(input_full, "w+");
-  fprintf(fileid, input_file_new);
-  fclose(fileid);
-  cmd=sprintf("echo inputARGON%d.dat|bolsigminus.exe ",ii);
-  system(cmd)
-endfor
+##for ii=1:nRUN
+##  %create a .txt file with 1000 variables value at most
+##  bolsigVAR=sprintf("bolsigVAR%d.txt", ii)
+##  fid = fopen( bolsigVAR , 'wt' );
+##  %if the number of residual values of VAR is less then 1000 the file txt is built accounting for it
+##  if (numel(x)-ii*maxRUN>=0)
+##    end_run=ii*maxRUN;
+##  else
+##    end_run=numel(x);
+##  endif
+##    fprintf(fid, '%7.0f. %14.0e %24.0e %28.0e \n',...
+##            [x(1 +(ii-1)*maxRUN:end_run),ionization_degree(1 +(ii-1)*maxRUN:end_run),...
+##             y(1 +(ii-1)*maxRUN:end_run),z(1 +(ii-1)*maxRUN:end_run)]');
+##
+##  %put the values of VAR in the .dat input file for BOLSIG
+##  input_empty=fileread("inputARGON_empty.dat"); %read the precompiled input in which some parts needs to be fullfilled
+##  run_cond=fileread(bolsigVAR);
+##  outputname=sprintf("output%d.dat",ii);
+##  input_file_new=strrep(input_empty, "/putVARhere", run_cond);
+##  input_file_new=strrep(input_file_new, "namefile.dat", outputname);
+##  input_full=sprintf("inputARGON%d.dat", ii)
+##  fileid=fopen(input_full, "w+");
+##  fprintf(fileid, input_file_new);
+##  fclose(fileid);
+##  cmd=sprintf("echo inputARGON%d.dat|bolsigminus.exe ",ii);
+##  system(cmd)
+##endfor
 
 %write the output in a single file
 Electric_field        =cell(numel(x),1);
@@ -112,8 +112,8 @@ a=[Electric_field, Ionization_Degree, Plasma_Density, Ar_Ex_Fraction,...
   Mobility, Mean_Energy, Coeff_Effective, Coeff_Excitation,...
   Coeff_IonizationAr, Coeff_IonizationArex];
 final_output=fopen("database.txt", "w+");
-fprintf(final_output, "/database proprieta' calcolate con BOLSIG+ \n");
-fprintf(final_output, "/Electric_field/N [Td] Ionization_Degree [1]...
+fprintf(final_output, "%%database proprieta' calcolate con BOLSIG+ \n");
+fprintf(final_output, "%%Electric_field/N [Td] Ionization_Degree [1]...
        Plasma Density [1/m^3] Excited Argon Fraction [1] Mobility*N [1/m/V/s]...
        Mean_Energy [1/m/V/s], Coeff_Effective [m^3/s] Coeff_Excitation [m^3/s]...
        Coeff_IonizationAr[m^3/s] Coeff_IonizationArex[m^3/s] \n");
@@ -124,4 +124,5 @@ fprintf(final_output, "/Electric_field/N [Td] Ionization_Degree [1]...
 for ii=1:numel(x)
   fprintf(final_output,'%1s %26s %26s %26s %26s %26s %26s %26s %26s %26s \n \n',a{ii, :});
 endfor
+
 fclose(final_output);
