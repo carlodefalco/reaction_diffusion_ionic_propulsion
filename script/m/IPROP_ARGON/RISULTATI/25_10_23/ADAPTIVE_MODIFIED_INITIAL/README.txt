@@ -1,5 +1,0 @@
-Tempo di simulazione
-TOL=
-T_VEC=
-INITIAL CONDITIONS
-COMMENTO:
