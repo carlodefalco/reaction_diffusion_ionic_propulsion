@@ -1,0 +1,12 @@
+[
+    {
+	"reactants" : { "A" : 1},
+	"products" : { "B" : 1},
+	"rate_coeffs" : [1e4, 0.0]
+    },
+    {
+	"reactants" : { "A" : 1, "C" : 1},
+	"products"  : { "B" : 1, "C" : 1},
+	"rate_coeffs" : [1e2, 0.0]
+    }
+]
