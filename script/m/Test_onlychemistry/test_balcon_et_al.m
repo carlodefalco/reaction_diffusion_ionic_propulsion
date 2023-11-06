@@ -13,38 +13,97 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+clc
+clear
 
 addpath (canonicalize_file_name ("../../../data"));
+addpath (canonicalize_file_name ("./funzioni chimica manuali"));
 addpath (canonicalize_file_name ("../"));
 [r, idx] = read_reactions (file_in_loadpath ("balcon_et_al_argon_ionization.json"));
-
+elements=fieldnames(idx);
 pretty_print_reactions (r);
 
+##
 x0 = zeros (numfields (idx), 1); %by defaults the photon initial density is zero.
+x0(idx.("Ar"))   = 2.5e+25;
+x0(idx.("e"))    = 1.0e18;
+x0(idx.("Ar+"))  = 1.0e18;
+x0(idx.("Ar2+")) = 1.0e16;
+x0(idx.("Ar*"))  = 1.0e18;
+x0(idx.("h_nu")) = 0;
 
-x0(idx.("Ar"))   = 2.5e+19/2.5e+19;
-x0(idx.("e"))    = 1.0e+6/2.5e+19;
-x0(idx.("Ar+"))  = 1.0e+6/2.5e+19;
-x0(idx.("Ar2+")) = 1.0e+3/2.5e+19;
-x0(idx.("Ar*"))  = 1.0e+10/2.5e+19;
-
-
-x0dot=zeros(numfields (idx), 1);
 T0   = 0;
-Tend = 1.0e-5;
-T=linspace(T0, Tend, 200);
+Tend = 1e5;
+T_vec=[0 logspace(-10, log10 (Tend), 1000)];
+s_e0=x0(idx.("e"));
+s_Ar0=x0(idx.("Ar"));
+s_Ar_excited0=x0(idx.("Ar*"));
+s_Ar_plus0=x0(idx.("Ar+"));
+s_Ar2_plus0=x0(idx.("Ar2+"));
+s_hnu0=x0(idx.("h_nu"));
+R1_f0 = r(1).rate_coeffs(1)*s_e0*s_Ar0;
+R2_f0 = r(2).rate_coeffs(1)*s_e0*s_Ar0;
+R3_f0 = r(3).rate_coeffs(1)*s_e0*s_Ar_excited0;
+R4_f0 = r(4).rate_coeffs(1)*s_Ar_excited0^2;
+R5_f0 = r(5).rate_coeffs(1)*s_Ar_plus0*s_Ar0^2;
+R6_f0 = r(6).rate_coeffs(1)*s_e0*s_Ar2_plus0;
+R7_f0 = r(7).rate_coeffs(1)*s_Ar_excited0;
+R8_f0 = r(8).rate_coeffs(1)*s_e0*s_Ar0;
+s_e0_dot = R1_f0 + R3_f0 + R4_f0 - R6_f0;
+s_Ar0_dot = - R1_f0 - R2_f0 + R4_f0 -R5_f0 + R6_f0 + R7_f0;
+s_Ar_plus0_dot = R1_f0 + R3_f0 + R4_f0 - R5_f0;
+s_Ar2_plus0_dot= + R5_f0 - R6_f0;
+s_Ar_excited0_dot= + R2_f0 - R3_f0- 2*R4_f0 + R6_f0 - R7_f0;
+s_hnu0_dot= R7_f0;
 
-eqs = @(t, x, xdot) compute_change_rates_implicit (x, xdot, r, idx);
-options = odeset('RelTol', 10.0^(-7), 'AbsTol', 10.0^(-7), 'Jacobian', @(t, x, xdot) implicit_change_rates_jacobian(t, x, xdot, r, idx));
-[t, y] = ode15i ( eqs, T, x0, x0dot, options);
+stiff_par=([x0(idx.("e")) * s_e0_dot ;
+x0(idx.("Ar")) *s_Ar0_dot;
+x0(idx.("Ar+")) *s_Ar_plus0_dot ;
+x0(idx.("Ar2+")) *s_Ar2_plus0_dot;
+x0(idx.("Ar*")) *s_Ar_excited0_dot;
+x0(idx.("h_nu")) *s_hnu0_dot]).^-1;
+M=eye(6);
 
-y=y.*2.5e+19;
-figure
-for ii=1:numfields(idx)
-loglog (T,y(:,ii), 'LineWidth', 2)
+x0dot=[s_e0_dot, s_Ar0_dot,s_Ar_plus0_dot,s_Ar_excited0_dot,s_Ar2_plus0_dot,s_hnu0_dot];
 
-hold on
+
+
+
+fun_jac = @(x) (- compute_change_rates (x, r, idx));
+
+options3=odeset('Jacobian',  @(t, x, xdot) implicit_change_rates_jacobian(t,x,xdot,r, idx));
+
+
+%%Integration
+
+eqs = @(t, x, xdot) compute_change_rates_implicit(x, xdot, r, idx);
+[t, y] = ode15i ( eqs, T_vec, x0, x0dot, options3);
+
+
+figure()
+for [val, key] = idx
+  warning ("off", "Octave:negative-data-log-axis")
+  loglog (t(2:end), y(:, val)(2:end), 'Linewidth', 2)
+  set (gca, 'fontsize', 24,
+       'ytick', logspace(-12, 20, 9),
+       'xtick', logspace(-15, 5, 6))
+  ylim ([1e-12 1e26])
+  title('ode15i')
+  hold all
 endfor
+legend (fieldnames (idx){:}, 'location', 'eastoutside')
 
-legend (fieldnames (idx){:}, 'location', 'eastoutside', 'FontSize', 18)
-hold off
+##figure()
+##
+##for [val, key] = idx
+##  warning ("off", "Octave:negative-data-log-axis")
+##  loglog (t3(2:end), y3(:, val)(2:end), 'Linewidth', 2)
+##  set (gca, 'fontsize', 24,
+##       'ytick', logspace(-12, 20, 9),
+##       'xtick', logspace(-15, 5, 6))
+##  ylim ([1e-12 1e26])
+##   title('euler')
+##  hold all
+##endfor
+##legend (fieldnames (idx){:}, 'location', 'eastoutside')
+##hold off

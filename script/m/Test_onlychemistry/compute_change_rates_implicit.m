@@ -49,8 +49,8 @@
 
 
 
-function implicit_eqs = compute_change_rates_implicit (state, dstate, reactions, index)
-  Ri_vec=[];
+function implicit_eqs = compute_change_rates_implicit (state, dstate, reactions, index, t=0)
+  t
   sum_Ri = zeros (size (state));
  for the_reaction = reactions(:)'
 
@@ -64,7 +64,7 @@ function implicit_eqs = compute_change_rates_implicit (state, dstate, reactions,
       Rbi *= state (index.(key)) ^ value;
     endfor
 
-    Ri = Rfi - Rbi;
+    Ri = Rfi- Rbi;
 
     for [value, key] = the_reaction.reactants
       sum_Ri (index.(key)) -= Ri * value;
@@ -75,8 +75,9 @@ function implicit_eqs = compute_change_rates_implicit (state, dstate, reactions,
       %Ri_vec= [Ri_vec; Ri*value];
     endfor
 
- endfor
- implicit_eqs = dstate-sum_Ri;
+endfor
+  M=eye(numfields(index));
+ implicit_eqs = M*dstate -sum_Ri;
 
 
 endfunction

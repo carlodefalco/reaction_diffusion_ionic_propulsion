@@ -4,30 +4,44 @@
 
 
 addpath (canonicalize_file_name ("../../../data"));
+addpath (canonicalize_file_name ("./funzioni chimica manuali"));
 addpath (canonicalize_file_name ("../"));
-[r, idx] = read_reactions (file_in_loadpath ("robertson_autocatalysis_simplified.json"));
+[r, idx] = read_reactions (file_in_loadpath ("robertson_autocatalysis.json"));
 pretty_print_reactions (r);
 
 x0 = zeros (numfields (idx), 1); %by defaults the photon initial density is zero.
 x0(idx.("A"))   = 1;
-x0(idx.("B"))    = 0;
-%x0(idx.("C"))  = 0;
+x0(idx.("B"))    = 0.5;
+x0(idx.("C"))  = 0.5;
 
+x0dot_hat=[-0.04,0.04,0]';
+T= [0 4*logspace(-6,6, 1e3)];
+T_hat=T;%./t_bar;
 
 
 x0dot=zeros(numfields (idx), 1);
 
-T0   = 0;
-Tend = 1.0e-5;
+##eqs =compute_change_rates_implicit2 (x0_hat, x0dot_hat, r, idx);
+##eqs3 =compute_change_rates_implicit (x0_hat, x0dot_hat, r, idx);
+##eqs2 = @(t, x, xdot) compute_change_rates_implicit2 (x, xdot, r, idx);
+##
+##options = odeset('RelTol', 10.0^(-7), 'AbsTol', 10.0^(-7), 'Jacobian', @implicit_change_rates_jacobian);
+##[t, y] = ode15i ( eqs2, T_hat, x0, x0dot);
+J=compute_change_rates_jacobian(x0, r, idx);
+keyboard
+[t3,y3]= time_integrator( T, x0, r, idx);
 
-eqs = @(t, x, xdot) compute_change_rates_implicit (x, xdot, r, idx);
+figure()
+y2 = y;%.*x_bar;
+y2(:,2) = y2(:,2)*1e4;
+semilogx(t,y2)
 
-options = odeset('RelTol', 10.0^(-7), 'AbsTol', 10.0^(-7), 'Jacobian', @compute_change_rates_jacobian_implicit);
-[t, y] = ode15i ( eqs, [0 4*logspace(-6,6)], x0, x0dot);
 
-figure
-
-y(:,2) = y(:,2);%*1e4;
-semilogx(t,y)
+hold on
+y2 = y3;%.*x_bar;
+y2(:,2) = y2(:,2)*1e4;
+semilogx(t,y2)
 ylabel('1e4 * y(:,2)')
-title('Robertson DAE problem with a Conservation Law, solved by ODE15I')
+legend('A-ode15i', 'B-ode15i','C-ode15i','A-manual', 'B-manual','C-manual')
+title('Robertson DAE problem ')
+
