@@ -19,21 +19,23 @@ clear
 addpath (canonicalize_file_name ("../../../data"));
 addpath (canonicalize_file_name ("./funzioni chimica manuali"));
 addpath (canonicalize_file_name ("../"));
-[r, idx] = read_reactions (file_in_loadpath ("balcon_et_al_argon_ionization.json"));
+addpath (canonicalize_file_name ("../IPROP_ARGON/READ_REACTIONS"));
+[r, idx] = read_reactions (file_in_loadpath ("balcon_et_al_argon_ionization3eV.json"));
+##[r, idx] = read_reactions (file_in_loadpath ("tamburini10Td.json"));
 elements=fieldnames(idx);
 pretty_print_reactions (r);
 
 ##
 x0 = zeros (numfields (idx), 1); %by defaults the photon initial density is zero.
 x0(idx.("Ar"))   = 2.5e+25;
-x0(idx.("e"))    = 1.0e18;
-x0(idx.("Ar+"))  = 1.0e18;
-x0(idx.("Ar2+")) = 1.0e16;
-x0(idx.("Ar*"))  = 1.0e18;
+x0(idx.("e"))    = 1.01e19;
+x0(idx.("Ar+"))  = 1.0e19;
+x0(idx.("Ar2+")) = 1.0e17;
+x0(idx.("Ar*"))  = 1.0e20;
 x0(idx.("h_nu")) = 0;
 
 T0   = 0;
-Tend = 1e5;
+Tend = 1e-3;
 T_vec=[0 logspace(-10, log10 (Tend), 1000)];
 s_e0=x0(idx.("e"));
 s_Ar0=x0(idx.("Ar"));
@@ -85,9 +87,9 @@ for [val, key] = idx
   warning ("off", "Octave:negative-data-log-axis")
   loglog (t(2:end), y(:, val)(2:end), 'Linewidth', 2)
   set (gca, 'fontsize', 24,
-       'ytick', logspace(-12, 20, 9),
-       'xtick', logspace(-15, 5, 6))
-  ylim ([1e-12 1e26])
+       'ytick', logspace(1, 20, 9),
+       'xtick', logspace(-10, 5, 6))
+  ylim ([1e1 1e26])
   title('ode15i')
   hold all
 endfor
