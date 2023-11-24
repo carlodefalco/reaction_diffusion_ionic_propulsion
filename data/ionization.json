@@ -1,0 +1,7 @@
+[
+    {
+	"reactants" : { "e" : 1, "Ar" : 1},
+	"products" : { "e" : 2, "Ar+" : 1},
+	"rate_coeffs" : [0.057925, 0.0]
+    }
+]
