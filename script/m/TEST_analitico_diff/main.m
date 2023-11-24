@@ -262,12 +262,12 @@ keyboard
 %% rearrenge y vector to plot results by species
 
 y=u';
-n1 =[ones(size(T_vec'))*BC_species(1,1) y(:,1:N-2)             ones(size(T_vec'))*BC_species(1,2)];
-n2 =[ones(size(T_vec'))*BC_species(2,1) y(:,(N-2)+1:2*(N-2))   ones(size(T_vec'))*BC_species(2,2)];
-n3 =[ones(size(T_vec'))*BC_species(3,1) y(:,2*(N-2)+1:3*(N-2)) ones(size(T_vec'))*BC_species(3,2)];
-n4 =[ones(size(T_vec'))*BC_species(4,1) y(:,3*(N-2)+1:4*(N-2)) ones(size(T_vec'))*BC_species(4,2)];
-n5 =[ones(size(T_vec'))*BC_species(5,1) y(:,4*(N-2)+1:5*(N-2)) ones(size(T_vec'))*BC_species(5,2)];
-n6 =[zeros(size(T_vec'))*BC_species(6,1) y(:,5*(N-2)+1:6*(N-2)) zeros(size(T_vec'))*BC_species(6,2)];
+n1  =[ones(size(T_vec'))*BC_species(1,1) y(:,1:N-2)             ones(size(T_vec'))*BC_species(1,2)];
+n2  =[ones(size(T_vec'))*BC_species(2,1) y(:,(N-2)+1:2*(N-2))   ones(size(T_vec'))*BC_species(2,2)];
+n3  =[ones(size(T_vec'))*BC_species(3,1) y(:,2*(N-2)+1:3*(N-2)) ones(size(T_vec'))*BC_species(3,2)];
+n4  =[ones(size(T_vec'))*BC_species(4,1) y(:,3*(N-2)+1:4*(N-2)) ones(size(T_vec'))*BC_species(4,2)];
+n5  =[ones(size(T_vec'))*BC_species(5,1) y(:,4*(N-2)+1:5*(N-2)) ones(size(T_vec'))*BC_species(5,2)];
+n6  =[zeros(size(T_vec'))*BC_species(6,1) y(:,5*(N-2)+1:6*(N-2)) zeros(size(T_vec'))*BC_species(6,2)];
 phi =[zeros(size(T_vec')) y(:,6*(N-2)+1:7*(N-2)) ones(size(T_vec'))*5000];
 %V = V0(t')(2, :);
 
@@ -371,22 +371,22 @@ for ii=1:1
 endfor
 
 
-##err_abs_local=zeros(size(x));
-##err_rel_local=zeros(size(x));
-##for ii = 1 : numel(x)
-## err_abs_local(ii)=norm(n1(:,ii)-n_el_exact(:,ii), inf);
-## err_rel_local(ii)=err_abs(ii)/norm(n_el_exact(:,ii),inf);
-##endfor
-##figure()
-##plot(x, err_abs_local)
-##title('err abs')
-##ylabel('norm(n-nex,inf)')
-##xlabel('tx')
-##figure()
-##plot(x, err_rel_local)
-##title('err rel')
-##ylabel('norm(n-nex,inf)/norm(nex,inf)')
-##xlabel('x')
+err_abs_local=zeros(size(x));
+err_rel_local=zeros(size(x));
+for ii = 1 : numel(x)
+ err_abs_local(ii)=norm(n1(:,ii)-n_el_exact(:,ii), inf);
+ err_rel_local(ii)=err_abs(ii)/norm(n_el_exact(:,ii),inf);
+endfor
+figure()
+plot(x, err_abs_local)
+title('err abs')
+ylabel('norm(n-nex,inf)')
+xlabel('tx')
+figure()
+plot(x, err_rel_local)
+title('err rel')
+ylabel('norm(n-nex,inf)/norm(nex,inf)')
+xlabel('x')
 figure()
 for ii = 1 :1: numel(t)
 
